@@ -1,0 +1,90 @@
+model:
+  name: clean_forecast_cycle
+  description: Cleaned and standardized forecast cycle data
+  layer: silver
+  kind: TABLE
+  owner: data_engineering
+  tags:
+  - forecast
+  - clean
+  - silver
+  domain: planning
+  refresh_frequency: daily
+source:
+  depends_on_tables:
+  - raw_forecast_cycle
+  base_table: raw_forecast_cycle
+transformations:
+  columns:
+  - name: ForecastCycleId
+    reference_table: raw_forecast_cycle
+    expression: TRIM(ForecastCycleId)
+    description: Cleaned forecast cycle identifier
+    data_type: STRING
+  - name: PeriodStart
+    reference_table: raw_forecast_cycle
+    expression: ''
+    description: Start date of forecast period
+    data_type: DATE
+  - name: PeriodEnd
+    reference_table: raw_forecast_cycle
+    expression: ''
+    description: End date of forecast period
+    data_type: DATE
+  - name: CycleName
+    reference_table: raw_forecast_cycle
+    expression: TRIM(UPPER(CycleName))
+    description: Standardized cycle name
+    data_type: STRING
+  - name: Status
+    reference_table: raw_forecast_cycle
+    expression: UPPER(Status)
+    description: Standardized status
+    data_type: STRING
+  - name: PeriodDays
+    reference_table: raw_forecast_cycle
+    expression: DATEDIFF(PeriodEnd, PeriodStart)
+    description: Number of days in the forecast period
+    data_type: INTEGER
+  - name: IsCurrentCycle
+    reference_table: raw_forecast_cycle
+    expression: CASE WHEN Status = "ACTIVE" AND CURRENT_DATE BETWEEN PeriodStart AND
+      PeriodEnd THEN TRUE ELSE FALSE END
+    description: Flag indicating if this is the current active cycle
+    data_type: BOOLEAN
+  - name: CreatedDate
+    reference_table: raw_forecast_cycle
+    expression: ''
+    description: Date when cycle was created
+    data_type: TIMESTAMP
+  - name: LoadTimestamp
+    reference_table: raw_forecast_cycle
+    expression: CURRENT_TIMESTAMP()
+    description: Timestamp when record was loaded
+    data_type: TIMESTAMP
+filters:
+  where_conditions:
+  - reference_table: raw_forecast_cycle
+    condition: ForecastCycleId IS NOT NULL
+  - reference_table: raw_forecast_cycle
+    condition: PeriodStart <= PeriodEnd
+grain:
+- ForecastCycleId
+optimization:
+  partitioned_by:
+  - PeriodStart
+  clustered_by:
+  - Status
+audits:
+  audits:
+  - type: NOT_NULL
+    columns:
+    - ForecastCycleId
+    - PeriodStart
+    - PeriodEnd
+  - type: UNIQUE_COMBINATION
+    columns:
+    - ForecastCycleId
+  - type: POSITIVE_VALUES
+    columns:
+    - PeriodDays

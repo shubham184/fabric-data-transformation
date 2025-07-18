@@ -1,0 +1,163 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 1: MODEL METADATA
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: slv_demand_storage
+  description: "Silver layer clean demand storage with business calculations and quality checks"
+  layer: silver
+  kind: TABLE
+  owner: unison insights
+  tags: [silver, demand, storage, clean]
+  domain: product
+  refresh_frequency: daily
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 2: DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: brz_demand_storage
+  depends_on_tables:
+    - brz_demand_storage
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 3: COLUMN TRANSFORMATIONS
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    # Foreign keys
+    - name: forecast_cycle_id
+      reference_table: brz_demand_storage
+      expression: ""
+      description: "Foreign key to forecast cycle"
+      data_type: INTEGER
+    - name: forecast_group_id
+      reference_table: brz_demand_storage
+      expression: ""
+      description: "Foreign key to forecast group"
+      data_type: INTEGER
+    - name: forecast_item_id
+      reference_table: brz_demand_storage
+      expression: ""
+      description: "Foreign key to forecast item"
+      data_type: INTEGER
+    
+    # Core quantities with null handling
+    - name: base_quantity
+      reference_table: brz_demand_storage
+      expression: "COALESCE(base_quantity, 0)"
+      description: "Base forecast quantity (null safe)"
+      data_type: DECIMAL(18,2)
+    - name: calculated_quantity
+      reference_table: brz_demand_storage
+      expression: "COALESCE(calculated_quantity, base_quantity, 0)"
+      description: "Calculated forecast quantity with fallback logic"
+      data_type: DECIMAL(18,2)
+    
+    # Variance calculations
+    - name: quantity_variance
+      reference_table: brz_demand_storage
+      expression: "calculated_quantity - base_quantity"
+      description: "Absolute difference between calculated and base quantity"
+      data_type: DECIMAL(18,2)
+    - name: quantity_variance_pct
+      reference_table: brz_demand_storage
+      expression: "CASE WHEN base_quantity > 0 THEN (calculated_quantity - base_quantity) / base_quantity * 100 ELSE 0 END"
+      description: "Percentage variance between calculated and base quantity"
+      data_type: DECIMAL(10,4)
+    - name: abs_quantity_variance_pct
+      reference_table: brz_demand_storage
+      expression: "ABS(quantity_variance_pct)"
+      description: "Absolute percentage variance"
+      data_type: DECIMAL(10,4)
+    
+    # Business classification flags
+    - name: is_zero_quantity
+      reference_table: brz_demand_storage
+      expression: "CASE WHEN calculated_quantity = 0 THEN 1 ELSE 0 END"
+      description: "Flag for zero quantity records"
+      data_type: BIT
+    - name: is_high_variance
+      reference_table: brz_demand_storage
+      expression: "CASE WHEN abs_quantity_variance_pct > 20 THEN 1 ELSE 0 END"
+      description: "Flag for high variance records (>20%)"
+      data_type: BIT
+    - name: is_negative_quantity
+      reference_table: brz_demand_storage
+      expression: "CASE WHEN calculated_quantity < 0 THEN 1 ELSE 0 END"
+      description: "Flag for negative quantity records"
+      data_type: BIT
+    - name: quantity_size_category
+      reference_table: brz_demand_storage
+      expression: "CASE WHEN calculated_quantity = 0 THEN 'Zero' WHEN calculated_quantity <= 100 THEN 'Small' WHEN calculated_quantity <= 1000 THEN 'Medium' ELSE 'Large' END"
+      description: "Quantity size categorization"
+      data_type: VARCHAR(20)
+    
+    # Data quality indicators
+    - name: base_calculated_match
+      reference_table: brz_demand_storage
+      expression: "CASE WHEN base_quantity = calculated_quantity THEN 1 ELSE 0 END"
+      description: "Flag indicating if base and calculated quantities match"
+      data_type: BIT
+    - name: has_null_base
+      reference_table: brz_demand_storage
+      expression: "CASE WHEN base_quantity IS NULL THEN 1 ELSE 0 END"
+      description: "Flag for records with null base quantity"
+      data_type: BIT
+    - name: has_null_calculated
+      reference_table: brz_demand_storage
+      expression: "CASE WHEN calculated_quantity IS NULL THEN 1 ELSE 0 END"
+      description: "Flag for records with null calculated quantity"
+      data_type: BIT
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 4: DATA FILTERING
+# ═══════════════════════════════════════════════════════════════════════════
+filters:
+  where_conditions:
+    - reference_table: brz_demand_storage
+      condition: "forecast_cycle_id IS NOT NULL"
+    - reference_table: brz_demand_storage
+      condition: "forecast_group_id IS NOT NULL"
+    - reference_table: brz_demand_storage
+      condition: "forecast_item_id IS NOT NULL"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 7: DATA QUALITY RULES
+# ═══════════════════════════════════════════════════════════════════════════
+audits:
+  not_null: [forecast_cycle_id, forecast_group_id, forecast_item_id, base_quantity, calculated_quantity]
+  positive_values: [forecast_cycle_id, forecast_group_id, forecast_item_id]
+  unique_combination: [forecast_cycle_id, forecast_group_id, forecast_item_id]
+  accepted_values:
+    quantity_size_category: ['Zero', 'Small', 'Medium', 'Large']
+
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 8: TABLE GRAIN DEFINITION
+# ═══════════════════════════════════════════════════════════════════════════
+grain:
+  - forecast_cycle_id
+  - forecast_group_id
+  - forecast_item_id
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 9: TABLE RELATIONSHIPS
+# ═══════════════════════════════════════════════════════════════════════════
+relationships:
+  foreign_keys:
+    - local_column: forecast_cycle_id
+      references_table: slv_forecast_cycle
+      references_column: forecast_cycle_id
+      relationship_type: many-to-one
+      join_type: INNER
+    - local_column: forecast_group_id
+      references_table: slv_forecast_group
+      references_column: forecast_group_id
+      relationship_type: many-to-one
+      join_type: INNER
+    - local_column: forecast_item_id
+      references_table: slv_forecast_item
+      references_column: forecast_item_id
+      relationship_type: many-to-one
+      join_type: INNER

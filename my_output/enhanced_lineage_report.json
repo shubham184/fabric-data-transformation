@@ -1,0 +1,560 @@
+{
+  "model_lineage": {
+    "nodes": [
+      {
+        "id": "raw_forecast_cycle",
+        "label": "raw_forecast_cycle",
+        "layer": "bronze",
+        "kind": "VIEW",
+        "owner": "data_engineering",
+        "domain": "planning",
+        "description": "Raw forecast cycle data from source systems",
+        "columns": [
+          "ForecastCycleId",
+          "PeriodStart",
+          "PeriodEnd",
+          "CycleName",
+          "Status",
+          "CreatedDate"
+        ]
+      },
+      {
+        "id": "active_forecast_cycles",
+        "label": "active_forecast_cycles",
+        "layer": "cte",
+        "kind": "CTE",
+        "owner": "data_engineering",
+        "domain": "planning",
+        "description": "Filter for active forecast cycles only",
+        "columns": [
+          "ForecastCycleId",
+          "PeriodStart",
+          "PeriodEnd",
+          "CycleName"
+        ]
+      },
+      {
+        "id": "fct_ForecastCycle",
+        "label": "fct_ForecastCycle",
+        "layer": "gold",
+        "kind": "TABLE",
+        "owner": "data_engineering",
+        "domain": "planning",
+        "description": "Fact table for forecast cycles - matches your JSON structure",
+        "columns": [
+          "ForecastCycle_Id",
+          "PeriodEnd",
+          "PeriodStart",
+          "CycleName",
+          "PeriodDays",
+          "IsActive"
+        ]
+      },
+      {
+        "id": "clean_forecast_cycle",
+        "label": "clean_forecast_cycle",
+        "layer": "silver",
+        "kind": "TABLE",
+        "owner": "data_engineering",
+        "domain": "planning",
+        "description": "Cleaned and standardized forecast cycle data",
+        "columns": [
+          "ForecastCycleId",
+          "PeriodStart",
+          "PeriodEnd",
+          "CycleName",
+          "Status",
+          "PeriodDays",
+          "IsCurrentCycle",
+          "CreatedDate",
+          "LoadTimestamp"
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "raw_forecast_cycle",
+        "target": "active_forecast_cycles",
+        "type": "dependency",
+        "relationship": "depends_on"
+      },
+      {
+        "source": "raw_forecast_cycle",
+        "target": "clean_forecast_cycle",
+        "type": "dependency",
+        "relationship": "depends_on"
+      },
+      {
+        "source": "active_forecast_cycles",
+        "target": "fct_ForecastCycle",
+        "type": "dependency",
+        "relationship": "depends_on"
+      },
+      {
+        "source": "clean_forecast_cycle",
+        "target": "fct_ForecastCycle",
+        "type": "dependency",
+        "relationship": "depends_on"
+      }
+    ]
+  },
+  "column_lineage": {
+    "nodes": [
+      {
+        "id": "raw_forecast_cycle.ForecastCycleId",
+        "label": "raw_forecast_cycle.ForecastCycleId",
+        "model": "raw_forecast_cycle",
+        "column": "ForecastCycleId",
+        "data_type": "STRING",
+        "expression": "",
+        "reference_table": "source_systems.forecast_cycles",
+        "description": "Unique forecast cycle identifier"
+      },
+      {
+        "id": "raw_forecast_cycle.PeriodStart",
+        "label": "raw_forecast_cycle.PeriodStart",
+        "model": "raw_forecast_cycle",
+        "column": "PeriodStart",
+        "data_type": "DATE",
+        "expression": "",
+        "reference_table": "source_systems.forecast_cycles",
+        "description": "Start date of forecast period"
+      },
+      {
+        "id": "raw_forecast_cycle.PeriodEnd",
+        "label": "raw_forecast_cycle.PeriodEnd",
+        "model": "raw_forecast_cycle",
+        "column": "PeriodEnd",
+        "data_type": "DATE",
+        "expression": "",
+        "reference_table": "source_systems.forecast_cycles",
+        "description": "End date of forecast period"
+      },
+      {
+        "id": "raw_forecast_cycle.CycleName",
+        "label": "raw_forecast_cycle.CycleName",
+        "model": "raw_forecast_cycle",
+        "column": "CycleName",
+        "data_type": "STRING",
+        "expression": "",
+        "reference_table": "source_systems.forecast_cycles",
+        "description": "Name of the forecast cycle"
+      },
+      {
+        "id": "raw_forecast_cycle.Status",
+        "label": "raw_forecast_cycle.Status",
+        "model": "raw_forecast_cycle",
+        "column": "Status",
+        "data_type": "STRING",
+        "expression": "",
+        "reference_table": "source_systems.forecast_cycles",
+        "description": "Status of the forecast cycle"
+      },
+      {
+        "id": "raw_forecast_cycle.CreatedDate",
+        "label": "raw_forecast_cycle.CreatedDate",
+        "model": "raw_forecast_cycle",
+        "column": "CreatedDate",
+        "data_type": "TIMESTAMP",
+        "expression": "",
+        "reference_table": "source_systems.forecast_cycles",
+        "description": "Date when cycle was created"
+      },
+      {
+        "id": "active_forecast_cycles.ForecastCycleId",
+        "label": "active_forecast_cycles.ForecastCycleId",
+        "model": "active_forecast_cycles",
+        "column": "ForecastCycleId",
+        "data_type": "STRING",
+        "expression": "",
+        "reference_table": "raw_forecast_cycle",
+        "description": "Unique forecast cycle identifier"
+      },
+      {
+        "id": "active_forecast_cycles.PeriodStart",
+        "label": "active_forecast_cycles.PeriodStart",
+        "model": "active_forecast_cycles",
+        "column": "PeriodStart",
+        "data_type": "DATE",
+        "expression": "",
+        "reference_table": "raw_forecast_cycle",
+        "description": "Start date of forecast period"
+      },
+      {
+        "id": "active_forecast_cycles.PeriodEnd",
+        "label": "active_forecast_cycles.PeriodEnd",
+        "model": "active_forecast_cycles",
+        "column": "PeriodEnd",
+        "data_type": "DATE",
+        "expression": "",
+        "reference_table": "raw_forecast_cycle",
+        "description": "End date of forecast period"
+      },
+      {
+        "id": "active_forecast_cycles.CycleName",
+        "label": "active_forecast_cycles.CycleName",
+        "model": "active_forecast_cycles",
+        "column": "CycleName",
+        "data_type": "STRING",
+        "expression": "",
+        "reference_table": "raw_forecast_cycle",
+        "description": "Name of the forecast cycle"
+      },
+      {
+        "id": "fct_ForecastCycle.ForecastCycle_Id",
+        "label": "fct_ForecastCycle.ForecastCycle_Id",
+        "model": "fct_ForecastCycle",
+        "column": "ForecastCycle_Id",
+        "data_type": "STRING",
+        "expression": "T.ForecastCycleId",
+        "reference_table": "clean_forecast_cycle",
+        "description": "Forecast cycle identifier (matches your JSON)"
+      },
+      {
+        "id": "fct_ForecastCycle.PeriodEnd",
+        "label": "fct_ForecastCycle.PeriodEnd",
+        "model": "fct_ForecastCycle",
+        "column": "PeriodEnd",
+        "data_type": "DATE",
+        "expression": "T.PeriodEnd",
+        "reference_table": "clean_forecast_cycle",
+        "description": "Period end date (matches your JSON)"
+      },
+      {
+        "id": "fct_ForecastCycle.PeriodStart",
+        "label": "fct_ForecastCycle.PeriodStart",
+        "model": "fct_ForecastCycle",
+        "column": "PeriodStart",
+        "data_type": "DATE",
+        "expression": "T.PeriodStart",
+        "reference_table": "clean_forecast_cycle",
+        "description": "Period start date (matches your JSON)"
+      },
+      {
+        "id": "fct_ForecastCycle.CycleName",
+        "label": "fct_ForecastCycle.CycleName",
+        "model": "fct_ForecastCycle",
+        "column": "CycleName",
+        "data_type": "STRING",
+        "expression": "T.CycleName",
+        "reference_table": "clean_forecast_cycle",
+        "description": "Standardized cycle name"
+      },
+      {
+        "id": "fct_ForecastCycle.PeriodDays",
+        "label": "fct_ForecastCycle.PeriodDays",
+        "model": "fct_ForecastCycle",
+        "column": "PeriodDays",
+        "data_type": "INTEGER",
+        "expression": "T.PeriodDays",
+        "reference_table": "clean_forecast_cycle",
+        "description": "Number of days in forecast period"
+      },
+      {
+        "id": "fct_ForecastCycle.IsActive",
+        "label": "fct_ForecastCycle.IsActive",
+        "model": "fct_ForecastCycle",
+        "column": "IsActive",
+        "data_type": "BOOLEAN",
+        "expression": "CASE WHEN A.ForecastCycleId IS NOT NULL THEN TRUE ELSE FALSE END",
+        "reference_table": "active_forecast_cycles",
+        "description": "Flag indicating if cycle is active"
+      },
+      {
+        "id": "clean_forecast_cycle.ForecastCycleId",
+        "label": "clean_forecast_cycle.ForecastCycleId",
+        "model": "clean_forecast_cycle",
+        "column": "ForecastCycleId",
+        "data_type": "STRING",
+        "expression": "TRIM(ForecastCycleId)",
+        "reference_table": "raw_forecast_cycle",
+        "description": "Cleaned forecast cycle identifier"
+      },
+      {
+        "id": "clean_forecast_cycle.PeriodStart",
+        "label": "clean_forecast_cycle.PeriodStart",
+        "model": "clean_forecast_cycle",
+        "column": "PeriodStart",
+        "data_type": "DATE",
+        "expression": "",
+        "reference_table": "raw_forecast_cycle",
+        "description": "Start date of forecast period"
+      },
+      {
+        "id": "clean_forecast_cycle.PeriodEnd",
+        "label": "clean_forecast_cycle.PeriodEnd",
+        "model": "clean_forecast_cycle",
+        "column": "PeriodEnd",
+        "data_type": "DATE",
+        "expression": "",
+        "reference_table": "raw_forecast_cycle",
+        "description": "End date of forecast period"
+      },
+      {
+        "id": "clean_forecast_cycle.CycleName",
+        "label": "clean_forecast_cycle.CycleName",
+        "model": "clean_forecast_cycle",
+        "column": "CycleName",
+        "data_type": "STRING",
+        "expression": "TRIM(UPPER(CycleName))",
+        "reference_table": "raw_forecast_cycle",
+        "description": "Standardized cycle name"
+      },
+      {
+        "id": "clean_forecast_cycle.Status",
+        "label": "clean_forecast_cycle.Status",
+        "model": "clean_forecast_cycle",
+        "column": "Status",
+        "data_type": "STRING",
+        "expression": "UPPER(Status)",
+        "reference_table": "raw_forecast_cycle",
+        "description": "Standardized status"
+      },
+      {
+        "id": "clean_forecast_cycle.PeriodDays",
+        "label": "clean_forecast_cycle.PeriodDays",
+        "model": "clean_forecast_cycle",
+        "column": "PeriodDays",
+        "data_type": "INTEGER",
+        "expression": "DATEDIFF(PeriodEnd, PeriodStart)",
+        "reference_table": "raw_forecast_cycle",
+        "description": "Number of days in the forecast period"
+      },
+      {
+        "id": "clean_forecast_cycle.IsCurrentCycle",
+        "label": "clean_forecast_cycle.IsCurrentCycle",
+        "model": "clean_forecast_cycle",
+        "column": "IsCurrentCycle",
+        "data_type": "BOOLEAN",
+        "expression": "CASE WHEN Status = \"ACTIVE\" AND CURRENT_DATE BETWEEN PeriodStart AND PeriodEnd THEN TRUE ELSE FALSE END",
+        "reference_table": "raw_forecast_cycle",
+        "description": "Flag indicating if this is the current active cycle"
+      },
+      {
+        "id": "clean_forecast_cycle.CreatedDate",
+        "label": "clean_forecast_cycle.CreatedDate",
+        "model": "clean_forecast_cycle",
+        "column": "CreatedDate",
+        "data_type": "TIMESTAMP",
+        "expression": "",
+        "reference_table": "raw_forecast_cycle",
+        "description": "Date when cycle was created"
+      },
+      {
+        "id": "clean_forecast_cycle.LoadTimestamp",
+        "label": "clean_forecast_cycle.LoadTimestamp",
+        "model": "clean_forecast_cycle",
+        "column": "LoadTimestamp",
+        "data_type": "TIMESTAMP",
+        "expression": "CURRENT_TIMESTAMP()",
+        "reference_table": "raw_forecast_cycle",
+        "description": "Timestamp when record was loaded"
+      }
+    ],
+    "edges": [
+      {
+        "source": "raw_forecast_cycle.ForecastCycleId",
+        "target": "active_forecast_cycles.ForecastCycleId",
+        "transformation_type": "direct",
+        "expression": ""
+      },
+      {
+        "source": "raw_forecast_cycle.ForecastCycleId",
+        "target": "clean_forecast_cycle.ForecastCycleId",
+        "transformation_type": "expression",
+        "expression": "TRIM(ForecastCycleId)"
+      },
+      {
+        "source": "raw_forecast_cycle.PeriodStart",
+        "target": "active_forecast_cycles.PeriodStart",
+        "transformation_type": "direct",
+        "expression": ""
+      },
+      {
+        "source": "raw_forecast_cycle.PeriodStart",
+        "target": "clean_forecast_cycle.PeriodStart",
+        "transformation_type": "direct",
+        "expression": ""
+      },
+      {
+        "source": "raw_forecast_cycle.PeriodStart",
+        "target": "clean_forecast_cycle.PeriodDays",
+        "transformation_type": "expression",
+        "expression": "DATEDIFF(PeriodEnd, PeriodStart)"
+      },
+      {
+        "source": "raw_forecast_cycle.PeriodStart",
+        "target": "clean_forecast_cycle.IsCurrentCycle",
+        "transformation_type": "expression",
+        "expression": "CASE WHEN Status = \"ACTIVE\" AND CURRENT_DATE BETWEEN PeriodStart AND PeriodEnd THEN TRUE ELSE FALSE END"
+      },
+      {
+        "source": "raw_forecast_cycle.PeriodEnd",
+        "target": "active_forecast_cycles.PeriodEnd",
+        "transformation_type": "direct",
+        "expression": ""
+      },
+      {
+        "source": "raw_forecast_cycle.PeriodEnd",
+        "target": "clean_forecast_cycle.PeriodEnd",
+        "transformation_type": "direct",
+        "expression": ""
+      },
+      {
+        "source": "raw_forecast_cycle.PeriodEnd",
+        "target": "clean_forecast_cycle.PeriodDays",
+        "transformation_type": "expression",
+        "expression": "DATEDIFF(PeriodEnd, PeriodStart)"
+      },
+      {
+        "source": "raw_forecast_cycle.PeriodEnd",
+        "target": "clean_forecast_cycle.IsCurrentCycle",
+        "transformation_type": "expression",
+        "expression": "CASE WHEN Status = \"ACTIVE\" AND CURRENT_DATE BETWEEN PeriodStart AND PeriodEnd THEN TRUE ELSE FALSE END"
+      },
+      {
+        "source": "raw_forecast_cycle.CycleName",
+        "target": "active_forecast_cycles.CycleName",
+        "transformation_type": "direct",
+        "expression": ""
+      },
+      {
+        "source": "raw_forecast_cycle.CycleName",
+        "target": "clean_forecast_cycle.CycleName",
+        "transformation_type": "expression",
+        "expression": "TRIM(UPPER(CycleName))"
+      },
+      {
+        "source": "raw_forecast_cycle.Status",
+        "target": "clean_forecast_cycle.Status",
+        "transformation_type": "expression",
+        "expression": "UPPER(Status)"
+      },
+      {
+        "source": "raw_forecast_cycle.Status",
+        "target": "clean_forecast_cycle.IsCurrentCycle",
+        "transformation_type": "expression",
+        "expression": "CASE WHEN Status = \"ACTIVE\" AND CURRENT_DATE BETWEEN PeriodStart AND PeriodEnd THEN TRUE ELSE FALSE END"
+      },
+      {
+        "source": "raw_forecast_cycle.CreatedDate",
+        "target": "clean_forecast_cycle.CreatedDate",
+        "transformation_type": "direct",
+        "expression": ""
+      },
+      {
+        "source": "active_forecast_cycles.ForecastCycleId",
+        "target": "fct_ForecastCycle.IsActive",
+        "transformation_type": "expression",
+        "expression": "CASE WHEN A.ForecastCycleId IS NOT NULL THEN TRUE ELSE FALSE END"
+      },
+      {
+        "source": "clean_forecast_cycle.ForecastCycleId",
+        "target": "fct_ForecastCycle.ForecastCycle_Id",
+        "transformation_type": "expression",
+        "expression": "T.ForecastCycleId"
+      },
+      {
+        "source": "clean_forecast_cycle.PeriodStart",
+        "target": "fct_ForecastCycle.PeriodStart",
+        "transformation_type": "expression",
+        "expression": "T.PeriodStart"
+      },
+      {
+        "source": "clean_forecast_cycle.PeriodEnd",
+        "target": "fct_ForecastCycle.PeriodEnd",
+        "transformation_type": "expression",
+        "expression": "T.PeriodEnd"
+      },
+      {
+        "source": "clean_forecast_cycle.CycleName",
+        "target": "fct_ForecastCycle.CycleName",
+        "transformation_type": "expression",
+        "expression": "T.CycleName"
+      },
+      {
+        "source": "clean_forecast_cycle.PeriodDays",
+        "target": "fct_ForecastCycle.PeriodDays",
+        "transformation_type": "expression",
+        "expression": "T.PeriodDays"
+      }
+    ]
+  },
+  "statistics": {
+    "total_models": 4,
+    "total_model_dependencies": 4,
+    "total_column_dependencies": 21,
+    "models_with_no_dependencies": [
+      "raw_forecast_cycle"
+    ],
+    "models_with_no_dependents": [
+      "fct_ForecastCycle"
+    ],
+    "most_dependent_models": [
+      [
+        "fct_ForecastCycle",
+        2
+      ],
+      [
+        "active_forecast_cycles",
+        1
+      ],
+      [
+        "clean_forecast_cycle",
+        1
+      ],
+      [
+        "raw_forecast_cycle",
+        0
+      ]
+    ],
+    "most_depended_upon_models": [
+      [
+        "raw_forecast_cycle",
+        2
+      ],
+      [
+        "active_forecast_cycles",
+        1
+      ],
+      [
+        "clean_forecast_cycle",
+        1
+      ],
+      [
+        "fct_ForecastCycle",
+        0
+      ]
+    ],
+    "layer_statistics": {
+      "bronze": {
+        "model_count": 1,
+        "total_columns": 6,
+        "models": [
+          "raw_forecast_cycle"
+        ]
+      },
+      "cte": {
+        "model_count": 1,
+        "total_columns": 4,
+        "models": [
+          "active_forecast_cycles"
+        ]
+      },
+      "gold": {
+        "model_count": 1,
+        "total_columns": 6,
+        "models": [
+          "fct_ForecastCycle"
+        ]
+      },
+      "silver": {
+        "model_count": 1,
+        "total_columns": 9,
+        "models": [
+          "clean_forecast_cycle"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,71 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 1: MODEL METADATA
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: slv_forecast_group
+  description: "Silver layer clean forecast group table with business logic"
+  layer: silver
+  kind: TABLE
+  owner: unison insights
+  tags: [silver, forecast, group, clean]
+  domain: product
+  refresh_frequency: daily
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 2: DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: brz_forecast_group
+  depends_on_tables:
+    - brz_forecast_group
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 3: COLUMN TRANSFORMATIONS
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    - name: forecast_group_id
+      reference_table: brz_forecast_group
+      expression: ""
+      description: "Unique forecast group identifier"
+      data_type: INTEGER
+    - name: group_label
+      reference_table: brz_forecast_group
+      expression: ""
+      description: "Forecast group label"
+      data_type: VARCHAR(255)
+    - name: group_name
+      reference_table: brz_forecast_group
+      expression: "CONCAT('Group_', CAST(forecast_group_id AS VARCHAR))"
+      description: "Standardized group name"
+      data_type: VARCHAR(255)
+    - name: group_type
+      reference_table: brz_forecast_group
+      expression: "CASE WHEN forecast_group_id <= 100 THEN 'Standard' ELSE 'Extended' END"
+      description: "Group type classification"
+      data_type: VARCHAR(50)
+    - name: is_active
+      reference_table: brz_forecast_group
+      expression: "1"
+      description: "Active status flag"
+      data_type: BIT
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 7: DATA QUALITY RULES
+# ═══════════════════════════════════════════════════════════════════════════
+audits:
+  - type: NOT_NULL
+    columns: [forecast_group_id, group_label, group_name]
+  - type: POSITIVE_VALUES
+    columns: [forecast_group_id]
+  - type: UNIQUE_COMBINATION
+    columns: [forecast_group_id]
+  - type: ACCEPTED_VALUES
+    columns: [group_type]
+    values: ['Standard', 'Extended']
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 8: TABLE GRAIN DEFINITION
+# ═══════════════════════════════════════════════════════════════════════════
+grain:
+  - forecast_group_id

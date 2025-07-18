@@ -1,0 +1,62 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 1: MODEL METADATA
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: brz_forecast_cycle
+  description: "Bronze layer view for forecast cycle raw data"
+  layer: bronze
+  kind: VIEW
+  owner: unison insights
+  tags: [bronze, forecast, cycle, raw]
+  domain: product
+  refresh_frequency: daily
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 2: DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: FCT_FORECASTCYCLE
+  depends_on_tables:
+    - FCT_FORECASTCYCLE
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 3: COLUMN TRANSFORMATIONS
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    - name: forecast_cycle_id
+      reference_table: FCT_FORECASTCYCLE
+      expression: "ForecastCycleId"
+      description: "Unique forecast cycle identifier"
+      data_type: INTEGER
+    - name: period_end
+      reference_table: FCT_FORECASTCYCLE
+      expression: "PeriodEnd"
+      description: "End date of the forecast period"
+      data_type: DATE
+    - name: period_start
+      reference_table: FCT_FORECASTCYCLE
+      expression: "PeriodStart"
+      description: "Start date of the forecast period"
+      data_type: DATE
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 4: DATA FILTERING
+# ═══════════════════════════════════════════════════════════════════════════
+filters:
+  where_conditions:
+    - reference_table: FCT_FORECASTCYCLE
+      condition: "PeriodEnd IS NOT NULL"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 7: DATA QUALITY RULES
+# ═══════════════════════════════════════════════════════════════════════════
+audits:
+  not_null: [forecast_cycle_id, period_end, period_start]
+  positive_values: [forecast_cycle_id]
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 8: TABLE GRAIN DEFINITION
+# ═══════════════════════════════════════════════════════════════════════════
+grain:
+  - forecast_cycle_id

@@ -1,0 +1,50 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 1: MODEL METADATA
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: brz_forecast_group
+  description: "Bronze layer view for forecast group raw data"
+  layer: bronze
+  kind: VIEW
+  owner: unison insights
+  tags: [bronze, forecast, group, raw]
+  domain: product
+  refresh_frequency: daily
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 2: DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: FCT_FORECASTGROUP
+  depends_on_tables:
+    - FCT_FORECASTGROUP
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 3: COLUMN TRANSFORMATIONS
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    - name: forecast_group_id
+      reference_table: FCT_FORECASTGROUP
+      expression: "ForecastGroupId"
+      description: "Unique forecast group identifier"
+      data_type: INTEGER
+    - name: group_label
+      reference_table: FCT_FORECASTGROUP
+      expression: "ForecastGroupId"
+      description: "Forecast group label"
+      data_type: VARCHAR(255)
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 7: DATA QUALITY RULES
+# ═══════════════════════════════════════════════════════════════════════════
+audits:
+  not_null: [forecast_group_id]
+  unique_combination: [forecast_group_id]
+  positive_values: [forecast_group_id]
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 8: TABLE GRAIN DEFINITION
+# ═══════════════════════════════════════════════════════════════════════════
+grain:
+  - forecast_group_id

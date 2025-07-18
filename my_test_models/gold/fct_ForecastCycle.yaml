@@ -1,0 +1,80 @@
+model:
+  name: fct_ForecastCycle
+  description: Fact table for forecast cycles - matches your JSON structure
+  layer: gold
+  kind: TABLE
+  owner: data_engineering
+  tags:
+  - forecast
+  - fact
+  - gold
+  domain: planning
+  refresh_frequency: daily
+source:
+  depends_on_tables:
+  - clean_forecast_cycle
+  - active_forecast_cycles
+  base_table: clean_forecast_cycle
+ctes:
+  ctes:
+  - active_forecast_cycles
+transformations:
+  columns:
+  - name: ForecastCycle_Id
+    reference_table: clean_forecast_cycle
+    expression: T.ForecastCycleId
+    description: Forecast cycle identifier (matches your JSON)
+    data_type: STRING
+  - name: PeriodEnd
+    reference_table: clean_forecast_cycle
+    expression: T.PeriodEnd
+    description: Period end date (matches your JSON)
+    data_type: DATE
+  - name: PeriodStart
+    reference_table: clean_forecast_cycle
+    expression: T.PeriodStart
+    description: Period start date (matches your JSON)
+    data_type: DATE
+  - name: CycleName
+    reference_table: clean_forecast_cycle
+    expression: T.CycleName
+    description: Standardized cycle name
+    data_type: STRING
+  - name: PeriodDays
+    reference_table: clean_forecast_cycle
+    expression: T.PeriodDays
+    description: Number of days in forecast period
+    data_type: INTEGER
+  - name: IsActive
+    reference_table: active_forecast_cycles
+    expression: CASE WHEN A.ForecastCycleId IS NOT NULL THEN TRUE ELSE FALSE END
+    description: Flag indicating if cycle is active
+    data_type: BOOLEAN
+relationships:
+  foreign_keys:
+  - local_column: ForecastCycle_Id
+    references_table: active_forecast_cycles
+    references_column: ForecastCycleId
+    relationship_type: many-to-one
+    join_type: LEFT
+filters:
+  where_conditions:
+  - reference_table: clean_forecast_cycle
+    condition: T.Status IN ("ACTIVE", "CLOSED")
+grain:
+- ForecastCycle_Id
+optimization:
+  partitioned_by:
+  - PeriodStart
+  clustered_by:
+  - IsActive
+audits:
+  audits:
+  - type: NOT_NULL
+    columns:
+    - ForecastCycle_Id
+    - PeriodStart
+    - PeriodEnd
+  - type: UNIQUE_COMBINATION
+    columns:
+    - ForecastCycle_Id

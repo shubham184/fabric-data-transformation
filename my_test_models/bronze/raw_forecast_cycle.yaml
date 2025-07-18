@@ -1,0 +1,61 @@
+model:
+  name: raw_forecast_cycle
+  description: Raw forecast cycle data from source systems
+  layer: bronze
+  kind: VIEW
+  owner: data_engineering
+  tags:
+  - forecast
+  - raw
+  - bronze
+  domain: planning
+  refresh_frequency: daily
+source:
+  base_table: source_systems.forecast_cycles
+transformations:
+  columns:
+  - name: ForecastCycleId
+    reference_table: source_systems.forecast_cycles
+    expression: ''
+    description: Unique forecast cycle identifier
+    data_type: STRING
+  - name: PeriodStart
+    reference_table: source_systems.forecast_cycles
+    expression: ''
+    description: Start date of forecast period
+    data_type: DATE
+  - name: PeriodEnd
+    reference_table: source_systems.forecast_cycles
+    expression: ''
+    description: End date of forecast period
+    data_type: DATE
+  - name: CycleName
+    reference_table: source_systems.forecast_cycles
+    expression: ''
+    description: Name of the forecast cycle
+    data_type: STRING
+  - name: Status
+    reference_table: source_systems.forecast_cycles
+    expression: ''
+    description: Status of the forecast cycle
+    data_type: STRING
+  - name: CreatedDate
+    reference_table: source_systems.forecast_cycles
+    expression: ''
+    description: Date when cycle was created
+    data_type: TIMESTAMP
+audits:
+  audits:
+  - type: NOT_NULL
+    columns:
+    - ForecastCycleId
+    - PeriodStart
+    - PeriodEnd
+  - type: ACCEPTED_VALUES
+    columns:
+    - Status
+    values:
+    - DRAFT
+    - ACTIVE
+    - CLOSED
+    - CANCELLED

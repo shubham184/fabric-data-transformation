@@ -1,0 +1,8 @@
+generate_audits: true
+generate_lineage: true
+incremental_strategy: append
+log_level: INFO
+models_directory: ./my_test_models
+output_directory: ./my_output
+sql_dialect: spark
+validate_on_read: true

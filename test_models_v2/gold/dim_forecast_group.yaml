@@ -1,0 +1,70 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 1: MODEL METADATA
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: dim_forecast_group
+  description: "Gold layer forecast group dimension table"
+  layer: gold
+  kind: TABLE
+  owner: unison insights
+  tags: [gold, dimension, forecast, group]
+  domain: product
+  refresh_frequency: daily
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 2: DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: slv_forecast_group
+  depends_on_tables:
+    - slv_forecast_group
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 3: COLUMN TRANSFORMATIONS
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    - name: forecast_group_key
+      reference_table: slv_forecast_group
+      expression: "forecast_group_id"
+      description: "Dimension key for forecast group"
+      data_type: INTEGER
+    - name: forecast_group_id
+      reference_table: slv_forecast_group
+      expression: ""
+      description: "Business key for forecast group"
+      data_type: INTEGER
+    - name: group_label
+      reference_table: slv_forecast_group
+      expression: ""
+      description: "Group label"
+      data_type: VARCHAR(255)
+    - name: group_name
+      reference_table: slv_forecast_group
+      expression: ""
+      description: "Standardized group name"
+      data_type: VARCHAR(255)
+    - name: group_type
+      reference_table: slv_forecast_group
+      expression: ""
+      description: "Group type classification"
+      data_type: VARCHAR(50)
+    - name: is_active
+      reference_table: slv_forecast_group
+      expression: ""
+      description: "Active status flag"
+      data_type: BIT
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 7: DATA QUALITY RULES
+# ═══════════════════════════════════════════════════════════════════════════
+audits:
+  not_null: [forecast_group_key, forecast_group_id, group_name]
+  positive_values: [forecast_group_key, forecast_group_id]
+  unique_combination: [forecast_group_key]
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 8: TABLE GRAIN DEFINITION
+# ═══════════════════════════════════════════════════════════════════════════
+grain:
+  - forecast_group_key

@@ -1,0 +1,130 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 1: MODEL METADATA
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: brz_forecast_item
+  description: "Bronze layer view for forecast item raw data"
+  layer: bronze
+  kind: VIEW
+  owner: unison insights
+  tags: [bronze, forecast, item, raw]
+  domain: product
+  refresh_frequency: daily
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 2: DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: FCT_FORECASTITEM
+  depends_on_tables:
+    - FCT_FORECASTITEM
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 3: COLUMN TRANSFORMATIONS
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    - name: pk_forecast_item_id
+      reference_table: FCT_FORECASTITEM
+      expression: "PK_FORECASTITEM_ID"
+      description: "Primary key for forecast item"
+      data_type: INTEGER
+    - name: fk_item_segmentation_id
+      reference_table: FCT_FORECASTITEM
+      expression: "FK_ITEMSEGMENTATION_ID"
+      description: "Foreign key to item segmentation"
+      data_type: INTEGER
+    - name: fk_node_segmentation_id
+      reference_table: FCT_FORECASTITEM
+      expression: "FK_NODESEGMENTATION_ID"
+      description: "Foreign key to node segmentation"
+      data_type: INTEGER
+    - name: forecast_item_id
+      reference_table: FCT_FORECASTITEM
+      expression: "FORECASTITEMID"
+      description: "Forecast item identifier"
+      data_type: INTEGER
+    - name: product_id
+      reference_table: FCT_FORECASTITEM
+      expression: "PRODUCTID"
+      description: "Product identifier"
+      data_type: INTEGER
+    - name: currency_id
+      reference_table: FCT_FORECASTITEM
+      expression: "CURRENCYID"
+      description: "Currency identifier"
+      data_type: INTEGER
+    - name: customer_id
+      reference_table: FCT_FORECASTITEM
+      expression: "CUSTOMERID"
+      description: "Customer identifier"
+      data_type: INTEGER
+    - name: business_segment_id
+      reference_table: FCT_FORECASTITEM
+      expression: "BUSINESSSEGMENTID"
+      description: "Business segment identifier"
+      data_type: INTEGER
+    - name: country
+      reference_table: FCT_FORECASTITEM
+      expression: "COUNTRY"
+      description: "Country code"
+      data_type: VARCHAR(10)
+    - name: priority
+      reference_table: FCT_FORECASTITEM
+      expression: "PRIORITY"
+      description: "Item priority level"
+      data_type: VARCHAR(50)
+    - name: ultimate_destination
+      reference_table: FCT_FORECASTITEM
+      expression: "ULTIMATEDESTINATION"
+      description: "Ultimate destination location"
+      data_type: VARCHAR(100)
+    - name: customer_segment
+      reference_table: FCT_FORECASTITEM
+      expression: "CUSTOMERSEGMENT"
+      description: "Customer segment classification"
+      data_type: VARCHAR(100)
+    - name: customer_priority
+      reference_table: FCT_FORECASTITEM
+      expression: "CUSTOMER_PRIORITY"
+      description: "Customer priority level"
+      data_type: VARCHAR(50)
+    - name: demand_family
+      reference_table: FCT_FORECASTITEM
+      expression: "DEMANDFAMILY"
+      description: "Demand family classification"
+      data_type: VARCHAR(100)
+    - name: forecast_type_id
+      reference_table: FCT_FORECASTITEM
+      expression: "FORECASTTYPEID"
+      description: "Forecast type identifier"
+      data_type: INTEGER
+    - name: location_id
+      reference_table: FCT_FORECASTITEM
+      expression: "LOCATIONID"
+      description: "Location identifier"
+      data_type: INTEGER
+    - name: subregion
+      reference_table: FCT_FORECASTITEM
+      expression: "SUBREGION"
+      description: "Subregion classification"
+      data_type: VARCHAR(100)
+    - name: derived_lob
+      reference_table: FCT_FORECASTITEM
+      expression: "DERIVEDLOB"
+      description: "Derived line of business"
+      data_type: VARCHAR(100)
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 7: DATA QUALITY RULES
+# ═══════════════════════════════════════════════════════════════════════════
+audits:
+  not_null: [pk_forecast_item_id, forecast_item_id]
+  positive_values: [pk_forecast_item_id, forecast_item_id]
+  unique_combination: [pk_forecast_item_id]
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 8: TABLE GRAIN DEFINITION
+# ═══════════════════════════════════════════════════════════════════════════
+grain:
+  - pk_forecast_item_id

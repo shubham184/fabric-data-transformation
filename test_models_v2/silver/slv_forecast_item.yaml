@@ -1,0 +1,206 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 1: MODEL METADATA
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: slv_forecast_item
+  description: "Silver layer clean forecast items with business logic and industry enrichment"
+  layer: silver
+  kind: TABLE
+  owner: unison insights
+  tags: [silver, forecast, item, enriched]
+  domain: product
+  refresh_frequency: daily
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 2: DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: brz_forecast_item
+  depends_on_tables:
+    - brz_forecast_item
+    - IndustryTable
+    - industry_enrichment_cte
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 3: COLUMN TRANSFORMATIONS
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    # Primary identifiers
+    - name: pk_forecast_item_id
+      reference_table: brz_forecast_item
+      expression: ""
+      description: "Primary key for forecast item"
+      data_type: INTEGER
+    - name: forecast_item_id
+      reference_table: brz_forecast_item
+      expression: ""
+      description: "Forecast item identifier"
+      data_type: INTEGER
+    - name: fk_item_segmentation_id
+      reference_table: brz_forecast_item
+      expression: ""
+      description: "Foreign key to item segmentation"
+      data_type: INTEGER
+    - name: fk_node_segmentation_id
+      reference_table: brz_forecast_item
+      expression: ""
+      description: "Foreign key to node segmentation"
+      data_type: INTEGER
+    
+    # Core business attributes
+    - name: product_id
+      reference_table: brz_forecast_item
+      expression: ""
+      description: "Product identifier"
+      data_type: INTEGER
+    - name: customer_id
+      reference_table: brz_forecast_item
+      expression: ""
+      description: "Customer identifier"
+      data_type: INTEGER
+    - name: currency_id
+      reference_table: brz_forecast_item
+      expression: ""
+      description: "Currency identifier"
+      data_type: INTEGER
+    - name: business_segment_id
+      reference_table: brz_forecast_item
+      expression: ""
+      description: "Business segment identifier"
+      data_type: INTEGER
+    - name: forecast_type_id
+      reference_table: brz_forecast_item
+      expression: ""
+      description: "Forecast type identifier"
+      data_type: INTEGER
+    - name: location_id
+      reference_table: brz_forecast_item
+      expression: ""
+      description: "Location identifier"
+      data_type: INTEGER
+    
+    # Geographic attributes
+    - name: country
+      reference_table: brz_forecast_item
+      expression: "UPPER(TRIM(country))"
+      description: "Standardized country code"
+      data_type: VARCHAR(10)
+    - name: subregion
+      reference_table: industry_enrichment_cte
+      expression: "COALESCE(alternative_subregion, base_subregion)"
+      description: "Enhanced subregion with industry alternatives"
+      data_type: VARCHAR(100)
+    - name: ultimate_destination
+      reference_table: brz_forecast_item
+      expression: "UPPER(TRIM(ultimate_destination))"
+      description: "Standardized ultimate destination"
+      data_type: VARCHAR(100)
+    
+    # Business classifications
+    - name: priority
+      reference_table: brz_forecast_item
+      expression: "CASE WHEN priority IS NULL THEN 'Medium' ELSE UPPER(TRIM(priority)) END"
+      description: "Standardized priority level"
+      data_type: VARCHAR(50)
+    - name: customer_segment
+      reference_table: brz_forecast_item
+      expression: "UPPER(TRIM(customer_segment))"
+      description: "Standardized customer segment"
+      data_type: VARCHAR(100)
+    - name: customer_priority
+      reference_table: brz_forecast_item
+      expression: "UPPER(TRIM(customer_priority))"
+      description: "Standardized customer priority"
+      data_type: VARCHAR(50)
+    - name: demand_family
+      reference_table: brz_forecast_item
+      expression: "UPPER(TRIM(demand_family))"
+      description: "Standardized demand family"
+      data_type: VARCHAR(100)
+    - name: derived_lob
+      reference_table: brz_forecast_item
+      expression: "UPPER(TRIM(derived_lob))"
+      description: "Standardized line of business"
+      data_type: VARCHAR(100)
+    
+    # Industry-specific enrichments
+    - name: industry_value_1
+      reference_table: industry_enrichment_cte
+      expression: "value1"
+      description: "Industry specific value 1"
+      data_type: DECIMAL(18,4)
+    - name: industry_value_2
+      reference_table: industry_enrichment_cte
+      expression: "value2"
+      description: "Industry specific value 2"
+      data_type: DECIMAL(18,4)
+    - name: industry_value_3
+      reference_table: industry_enrichment_cte
+      expression: "CASE WHEN feature_bias_calc_enabled = 1 THEN value3 ELSE NULL END"
+      description: "Industry specific value 3 (conditional on bias calculation feature)"
+      data_type: DECIMAL(18,4)
+    
+    # Calculated business flags
+    - name: is_high_priority
+      reference_table: brz_forecast_item
+      expression: "CASE WHEN priority IN ('HIGH', 'CRITICAL') THEN 1 ELSE 0 END"
+      description: "Flag for high priority items"
+      data_type: BIT
+    - name: is_strategic_customer
+      reference_table: brz_forecast_item
+      expression: "CASE WHEN customer_priority = 'HIGH' THEN 1 ELSE 0 END"
+      description: "Flag for strategic customers"
+      data_type: BIT
+    - name: is_international
+      reference_table: brz_forecast_item
+      expression: "CASE WHEN country NOT IN ('US', 'USA') THEN 1 ELSE 0 END"
+      description: "Flag for international items"
+      data_type: BIT
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 4: DATA FILTERING
+# ═══════════════════════════════════════════════════════════════════════════
+filters:
+  where_conditions:
+    - reference_table: brz_forecast_item
+      condition: "forecast_item_id IS NOT NULL"
+    - reference_table: industry_enrichment_cte
+      condition: "customer_flag = 1"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 5: COMMON TABLE EXPRESSIONS
+# ═══════════════════════════════════════════════════════════════════════════
+ctes:
+  - name: industry_enrichment_cte
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 7: DATA QUALITY RULES
+# ═══════════════════════════════════════════════════════════════════════════
+audits:
+  - type: NOT_NULL
+    columns: [pk_forecast_item_id, forecast_item_id, product_id, country, priority]
+  - type: POSITIVE_VALUES
+    columns: [pk_forecast_item_id, forecast_item_id, product_id]
+  - type: UNIQUE_COMBINATION
+    columns: [pk_forecast_item_id]
+  - type: ACCEPTED_VALUES
+    columns: [priority]
+    values: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 8: TABLE GRAIN DEFINITION
+# ═══════════════════════════════════════════════════════════════════════════
+grain:
+  - pk_forecast_item_id
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 9: TABLE RELATIONSHIPS
+# ═══════════════════════════════════════════════════════════════════════════
+relationships:
+  foreign_keys:
+    - local_column: forecast_item_id
+      references_table: brz_forecast_item
+      references_column: forecast_item_id
+      relationship_type: one-to-one
+      join_type: INNER

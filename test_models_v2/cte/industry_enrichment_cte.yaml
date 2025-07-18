@@ -1,0 +1,92 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 1: MODEL METADATA
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: industry_enrichment_cte
+  description: "CTE for industry-specific data enrichment"
+  layer: cte
+  kind: CTE
+  owner: unison insights
+  tags: [cte, industry, enrichment]
+  domain: product
+  refresh_frequency: daily
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 2: DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: IndustryTable
+  depends_on_tables:
+    - IndustryTable
+    - brz_forecast_item
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 3: COLUMN TRANSFORMATIONS
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    - name: forecast_item_id
+      reference_table: IndustryTable
+      expression: "FORECASTITEMID"
+      description: "Forecast item identifier"
+      data_type: INTEGER
+    - name: value1
+      reference_table: IndustryTable
+      expression: ""
+      description: "Industry specific value 1"
+      data_type: DECIMAL(18,4)
+    - name: value2
+      reference_table: IndustryTable
+      expression: ""
+      description: "Industry specific value 2"
+      data_type: DECIMAL(18,4)
+    - name: value3
+      reference_table: IndustryTable
+      expression: ""
+      description: "Industry specific value 3"
+      data_type: DECIMAL(18,4)
+    - name: alternative_subregion
+      reference_table: IndustryTable
+      expression: "Alternative_subregion"
+      description: "Alternative subregion classification"
+      data_type: VARCHAR(100)
+    - name: base_subregion
+      reference_table: brz_forecast_item
+      expression: "subregion"
+      description: "Original subregion from forecast item"
+      data_type: VARCHAR(100)
+    - name: customer_flag
+      reference_table: IndustryTable
+      expression: "customerflag"
+      description: "Customer flag for filtering"
+      data_type: BIT
+    - name: feature_bias_calc_enabled
+      reference_table: IndustryTable
+      expression: "CASE WHEN EXISTS (SELECT 1 FROM FeatureFlags WHERE feature_name = 'bias_calc' AND enabled = 1) THEN 1 ELSE 0 END"
+      description: "Feature flag for bias calculation"
+      data_type: BIT
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 4: DATA FILTERING
+# ═══════════════════════════════════════════════════════════════════════════
+filters:
+  where_conditions:
+    - reference_table: IndustryTable
+      condition: "FORECASTITEMID IS NOT NULL"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 8: TABLE GRAIN DEFINITION
+# ═══════════════════════════════════════════════════════════════════════════
+grain:
+  - forecast_item_id
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 9: TABLE RELATIONSHIPS
+# ═══════════════════════════════════════════════════════════════════════════
+relationships:
+  foreign_keys:
+    - local_column: forecast_item_id
+      references_table: brz_forecast_item
+      references_column: forecast_item_id
+      relationship_type: many-to-one
+      join_type: INNER

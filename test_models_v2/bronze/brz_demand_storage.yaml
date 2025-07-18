@@ -1,0 +1,95 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 1: MODEL METADATA
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: brz_demand_storage
+  description: "Bronze layer view for demand storage raw data"
+  layer: bronze
+  kind: VIEW
+  owner: unison insights
+  tags: [bronze, demand, storage, raw]
+  domain: product
+  refresh_frequency: daily
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 2: DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: fct_demandstorage
+  depends_on_tables: 
+     - fct_demandstorage
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 3: COLUMN TRANSFORMATIONS
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    - name: base_quantity
+      reference_table: fct_demandstorage
+      expression: "BASEQUANTITY"
+      description: "Base forecast quantity"
+      data_type: DECIMAL(18,2)
+    - name: calculated_quantity
+      reference_table: fct_demandstorage
+      expression: "CalculatedQuantity"
+      description: "Calculated forecast quantity"
+      data_type: DECIMAL(18,2)
+    - name: forecast_cycle_id
+      reference_table: fct_demandstorage
+      expression: "ForecastCycleId"
+      description: "Foreign key to forecast cycle"
+      data_type: INTEGER
+    - name: forecast_group_id
+      reference_table: fct_demandstorage
+      expression: "ForecastGroupId"
+      description: "Foreign key to forecast group"
+      data_type: INTEGER
+    - name: forecast_item_id
+      reference_table: fct_demandstorage
+      expression: "ForecastItem_Id"
+      description: "Foreign key to forecast item"
+      data_type: INTEGER
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 4: DATA FILTERING
+# ═══════════════════════════════════════════════════════════════════════════
+filters:
+  where_conditions:
+    - reference_table: fct_demandstorage
+      condition: "BASEQUANTITY IS NOT NULL"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 7: DATA QUALITY RULES
+# ═══════════════════════════════════════════════════════════════════════════
+audits:
+  not_null: [forecast_cycle_id, forecast_group_id, forecast_item_id]
+  positive_values: [base_quantity, calculated_quantity]
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 8: TABLE GRAIN DEFINITION
+# ═══════════════════════════════════════════════════════════════════════════
+grain:
+  - forecast_cycle_id
+  - forecast_group_id
+  - forecast_item_id
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 9: TABLE RELATIONSHIPS
+# ═══════════════════════════════════════════════════════════════════════════
+relationships:
+  foreign_keys:
+    - local_column: forecast_cycle_id
+      references_table: FCT_FORECASTCYCLE
+      references_column: ForecastCycleId
+      relationship_type: many-to-one
+      join_type: INNER
+    - local_column: forecast_group_id
+      references_table: FCT_FORECASTGROUP
+      references_column: ForecastGroupId
+      relationship_type: many-to-one
+      join_type: INNER
+    - local_column: forecast_item_id
+      references_table: FCT_FORECASTITEM
+      references_column: FORECASTITEMID
+      relationship_type: many-to-one
+      join_type: INNER

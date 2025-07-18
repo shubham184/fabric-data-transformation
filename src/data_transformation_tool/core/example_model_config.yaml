@@ -1,0 +1,79 @@
+# Example YAML configuration showing correct format for all sections
+model:
+  name: example_model_name
+  description: "Description of your model"
+  layer: bronze  # bronze | silver | gold | cte
+  kind: TABLE    # TABLE | VIEW | CTE
+  owner: your_team_name
+  tags: [tag1, tag2, tag3]
+  domain: product
+  refresh_frequency: daily  # daily | hourly | weekly | monthly
+
+source:
+  base_table: your_main_table  # optional
+  depends_on_tables:
+    - source_table_1
+    - source_table_2
+    - cte_name
+
+transformations:
+  columns:
+    - name: output_column_name
+      reference_table: source_table_name
+      expression: "source_column_name"  # or "" for same name
+      description: "Column description"
+      data_type: "VARCHAR(100)"
+    - name: calculated_column
+      reference_table: source_table_name
+      expression: "SUM(amount)"
+      description: "Calculated field"
+      data_type: "DECIMAL(18,2)"
+
+filters:
+  where_conditions:
+    - reference_table: table1
+      condition: "status = 'active'"
+    - reference_table: table2
+      condition: "created_date >= '2024-01-01'"
+
+ctes:
+  ctes:
+    - cte_name_1
+    - cte_name_2
+
+aggregations:
+  group_by:
+    - column1
+    - column2
+  having:
+    - "SUM(amount) > 1000"
+    - "COUNT(*) >= 5"
+
+audits:
+  not_null: [column1, column2]
+  positive_values: [column3, column4]
+  unique_combination: [column5]
+  accepted_values:
+    status: ['active', 'inactive']
+    priority: ['high', 'medium', 'low']
+
+grain:
+  - primary_key_column
+  - dimension_column
+
+relationships:
+  foreign_keys:
+    - local_column: column_name
+      references_table: target_table
+      references_column: target_column
+      relationship_type: many-to-one
+      join_type: INNER
+
+optimization:
+  partitioned_by: [date_column]
+  clustered_by: [id_column]
+  indexes:
+    - columns: [column1, column2]
+      type: "composite"
+    - columns: [unique_column]
+      type: "unique"

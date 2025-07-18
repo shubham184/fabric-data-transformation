@@ -1,0 +1,42 @@
+model:
+  name: active_forecast_cycles
+  description: Filter for active forecast cycles only
+  layer: cte
+  kind: CTE
+  owner: data_engineering
+  tags:
+  - forecast
+  - cte
+  - active
+  domain: planning
+  refresh_frequency: daily
+source:
+  depends_on_tables:
+  - raw_forecast_cycle
+  base_table: raw_forecast_cycle
+transformations:
+  columns:
+  - name: ForecastCycleId
+    reference_table: raw_forecast_cycle
+    expression: ''
+    description: Unique forecast cycle identifier
+    data_type: STRING
+  - name: PeriodStart
+    reference_table: raw_forecast_cycle
+    expression: ''
+    description: Start date of forecast period
+    data_type: DATE
+  - name: PeriodEnd
+    reference_table: raw_forecast_cycle
+    expression: ''
+    description: End date of forecast period
+    data_type: DATE
+  - name: CycleName
+    reference_table: raw_forecast_cycle
+    expression: ''
+    description: Name of the forecast cycle
+    data_type: STRING
+filters:
+  where_conditions:
+  - reference_table: raw_forecast_cycle
+    condition: Status = "ACTIVE"

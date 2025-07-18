@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Data Lineage</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style type="text/css">
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        #network { width: 100%; height: 600px; border: 1px solid lightgray; }
+        #info-panel { margin-top: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .model-info { background-color: #f9f9f9; padding: 10px; margin: 10px 0; border-radius: 3px; }
+        .column-list { max-height: 200px; overflow-y: auto; }
+        .control-panel { margin-bottom: 20px; padding: 10px; background-color: #f0f0f0; border-radius: 5px; }
+        button { margin: 5px; padding: 8px 15px; cursor: pointer; }
+        select { margin: 5px; padding: 5px; }
+        .legend { margin: 10px 0; }
+        .legend-item { display: inline-block; margin: 5px 10px; }
+        .legend-color { display: inline-block; width: 20px; height: 20px; margin-right: 5px; vertical-align: middle; }
+    </style>
+</head>
+<body>
+    <h1>Data Lineage</h1>
+    
+    <div class="control-panel">
+        <button onclick="fitNetwork()">Fit to Screen</button>
+        <button onclick="showAllNodes()">Show All</button>
+        <select id="layerFilter" onchange="filterByLayer()">
+            <option value="">All Layers</option>
+            <option value="bronze">Bronze</option>
+            <option value="silver">Silver</option>
+            <option value="gold">Gold</option>
+            <option value="cte">CTE</option>
+        </select>
+        <select id="modelSelect" onchange="focusOnModel()">
+            <option value="">Select Model</option>
+        </select>
+    </div>
+    
+    <div class="legend">
+        <div class="legend-item">
+            <span class="legend-color" style="background-color: #87CEEB;"></span>Bronze Layer
+        </div>
+        <div class="legend-item">
+            <span class="legend-color" style="background-color: #98FB98;"></span>Silver Layer
+        </div>
+        <div class="legend-item">
+            <span class="legend-color" style="background-color: #FFD700;"></span>Gold Layer
+        </div>
+        <div class="legend-item">
+            <span class="legend-color" style="background-color: #D3D3D3;"></span>CTE
+        </div>
+    </div>
+    
+    <div id="network"></div>
+    
+    <div id="info-panel">
+        <h3>Model Information</h3>
+        <div id="model-details">Click on a node to see model details</div>
+    </div>
+
+    <script type="text/javascript">
+        var nodes = new vis.DataSet([{"id": "raw_forecast_cycle", "label": "raw_forecast_cycle", "title": "<b>raw_forecast_cycle</b><br>Layer: bronze<br>Kind: VIEW<br>Owner: data_engineering<br>Domain: planning<br>Description: Raw forecast cycle data from source systems<br>Columns: 6", "group": "bronze", "shape": "ellipse", "color": "#87CEEB", "font": {"size": 12}, "physics": true}, {"id": "active_forecast_cycles", "label": "active_forecast_cycles", "title": "<b>active_forecast_cycles</b><br>Layer: cte<br>Kind: CTE<br>Owner: data_engineering<br>Domain: planning<br>Description: Filter for active forecast cycles only<br>Columns: 4", "group": "cte", "shape": "diamond", "color": "#D3D3D3", "font": {"size": 12}, "physics": true}, {"id": "fct_ForecastCycle", "label": "fct_ForecastCycle", "title": "<b>fct_ForecastCycle</b><br>Layer: gold<br>Kind: TABLE<br>Owner: data_engineering<br>Domain: planning<br>Description: Fact table for forecast cycles - matches your JSON structure<br>Columns: 6", "group": "gold", "shape": "box", "color": "#FFD700", "font": {"size": 12}, "physics": true}, {"id": "clean_forecast_cycle", "label": "clean_forecast_cycle", "title": "<b>clean_forecast_cycle</b><br>Layer: silver<br>Kind: TABLE<br>Owner: data_engineering<br>Domain: planning<br>Description: Cleaned and standardized forecast cycle data<br>Columns: 9", "group": "silver", "shape": "box", "color": "#98FB98", "font": {"size": 12}, "physics": true}]);
+        var edges = new vis.DataSet([{"id": 0, "from": "raw_forecast_cycle", "to": "active_forecast_cycles", "arrows": "to", "color": {"color": "#848484"}, "width": 2, "title": "raw_forecast_cycle \u2192 active_forecast_cycles"}, {"id": 1, "from": "clean_forecast_cycle", "to": "fct_ForecastCycle", "arrows": "to", "color": {"color": "#848484"}, "width": 2, "title": "clean_forecast_cycle \u2192 fct_ForecastCycle"}, {"id": 2, "from": "active_forecast_cycles", "to": "fct_ForecastCycle", "arrows": "to", "color": {"color": "#2E86C1"}, "width": 2, "title": "active_forecast_cycles \u2192 fct_ForecastCycle (CTE)", "dashes": true}, {"id": 3, "from": "raw_forecast_cycle", "to": "clean_forecast_cycle", "arrows": "to", "color": {"color": "#848484"}, "width": 2, "title": "raw_forecast_cycle \u2192 clean_forecast_cycle"}]);
+        var modelsInfo = {"raw_forecast_cycle": {"name": "raw_forecast_cycle", "description": "Raw forecast cycle data from source systems", "layer": "bronze", "kind": "VIEW", "owner": "data_engineering", "domain": "planning", "tags": ["forecast", "raw", "bronze"], "refresh_frequency": "daily", "depends_on": [], "base_table": "source_systems.forecast_cycles", "columns": [{"name": "ForecastCycleId", "data_type": "STRING", "description": "Unique forecast cycle identifier", "reference_table": "source_systems.forecast_cycles", "expression": ""}, {"name": "PeriodStart", "data_type": "DATE", "description": "Start date of forecast period", "reference_table": "source_systems.forecast_cycles", "expression": ""}, {"name": "PeriodEnd", "data_type": "DATE", "description": "End date of forecast period", "reference_table": "source_systems.forecast_cycles", "expression": ""}, {"name": "CycleName", "data_type": "STRING", "description": "Name of the forecast cycle", "reference_table": "source_systems.forecast_cycles", "expression": ""}, {"name": "Status", "data_type": "STRING", "description": "Status of the forecast cycle", "reference_table": "source_systems.forecast_cycles", "expression": ""}, {"name": "CreatedDate", "data_type": "TIMESTAMP", "description": "Date when cycle was created", "reference_table": "source_systems.forecast_cycles", "expression": ""}], "audits": [{"type": "NOT_NULL", "columns": ["ForecastCycleId", "PeriodStart", "PeriodEnd"], "values": null}, {"type": "ACCEPTED_VALUES", "columns": ["Status"], "values": ["DRAFT", "ACTIVE", "CLOSED", "CANCELLED"]}], "grain": []}, "active_forecast_cycles": {"name": "active_forecast_cycles", "description": "Filter for active forecast cycles only", "layer": "cte", "kind": "CTE", "owner": "data_engineering", "domain": "planning", "tags": ["forecast", "cte", "active"], "refresh_frequency": "daily", "depends_on": ["raw_forecast_cycle"], "base_table": "raw_forecast_cycle", "columns": [{"name": "ForecastCycleId", "data_type": "STRING", "description": "Unique forecast cycle identifier", "reference_table": "raw_forecast_cycle", "expression": ""}, {"name": "PeriodStart", "data_type": "DATE", "description": "Start date of forecast period", "reference_table": "raw_forecast_cycle", "expression": ""}, {"name": "PeriodEnd", "data_type": "DATE", "description": "End date of forecast period", "reference_table": "raw_forecast_cycle", "expression": ""}, {"name": "CycleName", "data_type": "STRING", "description": "Name of the forecast cycle", "reference_table": "raw_forecast_cycle", "expression": ""}], "audits": [], "grain": []}, "fct_ForecastCycle": {"name": "fct_ForecastCycle", "description": "Fact table for forecast cycles - matches your JSON structure", "layer": "gold", "kind": "TABLE", "owner": "data_engineering", "domain": "planning", "tags": ["forecast", "fact", "gold"], "refresh_frequency": "daily", "depends_on": ["clean_forecast_cycle", "active_forecast_cycles"], "base_table": "clean_forecast_cycle", "columns": [{"name": "ForecastCycle_Id", "data_type": "STRING", "description": "Forecast cycle identifier (matches your JSON)", "reference_table": "clean_forecast_cycle", "expression": "T.ForecastCycleId"}, {"name": "PeriodEnd", "data_type": "DATE", "description": "Period end date (matches your JSON)", "reference_table": "clean_forecast_cycle", "expression": "T.PeriodEnd"}, {"name": "PeriodStart", "data_type": "DATE", "description": "Period start date (matches your JSON)", "reference_table": "clean_forecast_cycle", "expression": "T.PeriodStart"}, {"name": "CycleName", "data_type": "STRING", "description": "Standardized cycle name", "reference_table": "clean_forecast_cycle", "expression": "T.CycleName"}, {"name": "PeriodDays", "data_type": "INTEGER", "description": "Number of days in forecast period", "reference_table": "clean_forecast_cycle", "expression": "T.PeriodDays"}, {"name": "IsActive", "data_type": "BOOLEAN", "description": "Flag indicating if cycle is active", "reference_table": "active_forecast_cycles", "expression": "CASE WHEN A.ForecastCycleId IS NOT NULL THEN TRUE ELSE FALSE END"}], "audits": [{"type": "NOT_NULL", "columns": ["ForecastCycle_Id", "PeriodStart", "PeriodEnd"], "values": null}, {"type": "UNIQUE_COMBINATION", "columns": ["ForecastCycle_Id"], "values": null}], "grain": ["ForecastCycle_Id"]}, "clean_forecast_cycle": {"name": "clean_forecast_cycle", "description": "Cleaned and standardized forecast cycle data", "layer": "silver", "kind": "TABLE", "owner": "data_engineering", "domain": "planning", "tags": ["forecast", "clean", "silver"], "refresh_frequency": "daily", "depends_on": ["raw_forecast_cycle"], "base_table": "raw_forecast_cycle", "columns": [{"name": "ForecastCycleId", "data_type": "STRING", "description": "Cleaned forecast cycle identifier", "reference_table": "raw_forecast_cycle", "expression": "TRIM(ForecastCycleId)"}, {"name": "PeriodStart", "data_type": "DATE", "description": "Start date of forecast period", "reference_table": "raw_forecast_cycle", "expression": ""}, {"name": "PeriodEnd", "data_type": "DATE", "description": "End date of forecast period", "reference_table": "raw_forecast_cycle", "expression": ""}, {"name": "CycleName", "data_type": "STRING", "description": "Standardized cycle name", "reference_table": "raw_forecast_cycle", "expression": "TRIM(UPPER(CycleName))"}, {"name": "Status", "data_type": "STRING", "description": "Standardized status", "reference_table": "raw_forecast_cycle", "expression": "UPPER(Status)"}, {"name": "PeriodDays", "data_type": "INTEGER", "description": "Number of days in the forecast period", "reference_table": "raw_forecast_cycle", "expression": "DATEDIFF(PeriodEnd, PeriodStart)"}, {"name": "IsCurrentCycle", "data_type": "BOOLEAN", "description": "Flag indicating if this is the current active cycle", "reference_table": "raw_forecast_cycle", "expression": "CASE WHEN Status = \"ACTIVE\" AND CURRENT_DATE BETWEEN PeriodStart AND PeriodEnd THEN TRUE ELSE FALSE END"}, {"name": "CreatedDate", "data_type": "TIMESTAMP", "description": "Date when cycle was created", "reference_table": "raw_forecast_cycle", "expression": ""}, {"name": "LoadTimestamp", "data_type": "TIMESTAMP", "description": "Timestamp when record was loaded", "reference_table": "raw_forecast_cycle", "expression": "CURRENT_TIMESTAMP()"}], "audits": [{"type": "NOT_NULL", "columns": ["ForecastCycleId", "PeriodStart", "PeriodEnd"], "values": null}, {"type": "UNIQUE_COMBINATION", "columns": ["ForecastCycleId"], "values": null}, {"type": "POSITIVE_VALUES", "columns": ["PeriodDays"], "values": null}], "grain": ["ForecastCycleId"]}};
+        
+        var container = document.getElementById('network');
+        var data = { nodes: nodes, edges: edges };
+        var options = {
+            layout: {
+                hierarchical: {
+                    direction: 'LR',
+                    sortMethod: 'directed',
+                    levelSeparation: 150,
+                    nodeSpacing: 100
+                }
+            },
+            physics: {
+                enabled: true,
+                hierarchicalRepulsion: {
+                    centralGravity: 0.0,
+                    springLength: 100,
+                    springConstant: 0.01,
+                    nodeDistance: 120,
+                    damping: 0.09
+                },
+                maxVelocity: 50,
+                solver: 'hierarchicalRepulsion',
+                timestep: 0.35,
+                stabilization: {iterations: 150}
+            },
+            interaction: {
+                dragNodes: true,
+                dragView: true,
+                zoomView: true
+            }
+        };
+        
+        var network = new vis.Network(container, data, options);
+        
+        // Populate model select dropdown
+        var modelSelect = document.getElementById('modelSelect');
+        Object.keys(modelsInfo).sort().forEach(function(modelName) {
+            var option = document.createElement('option');
+            option.value = modelName;
+            option.textContent = modelName;
+            modelSelect.appendChild(option);
+        });
+        
+        // Event listener for node clicks
+        network.on("click", function (params) {
+            if (params.nodes.length > 0) {
+                var modelName = params.nodes[0];
+                showModelDetails(modelName);
+            }
+        });
+        
+        function showModelDetails(modelName) {
+            var model = modelsInfo[modelName];
+            if (!model) return;
+            
+            var html = '<div class="model-info">';
+            html += '<h4>' + model.name + '</h4>';
+            html += '<p><strong>Description:</strong> ' + (model.description || 'N/A') + '</p>';
+            html += '<p><strong>Layer:</strong> ' + model.layer + '</p>';
+            html += '<p><strong>Kind:</strong> ' + model.kind + '</p>';
+            html += '<p><strong>Owner:</strong> ' + model.owner + '</p>';
+            html += '<p><strong>Domain:</strong> ' + model.domain + '</p>';
+            html += '<p><strong>Refresh Frequency:</strong> ' + model.refresh_frequency + '</p>';
+            
+            if (model.depends_on && model.depends_on.length > 0) {
+                html += '<p><strong>Dependencies:</strong> ' + model.depends_on.join(', ') + '</p>';
+            }
+            
+            if (model.columns && model.columns.length > 0) {
+                html += '<p><strong>Columns (' + model.columns.length + '):</strong></p>';
+                html += '<div class="column-list"><ul>';
+                model.columns.forEach(function(col) {
+                    html += '<li><strong>' + col.name + '</strong> (' + col.data_type + ')';
+                    if (col.description) {
+                        html += ' - ' + col.description;
+                    }
+                    html += '</li>';
+                });
+                html += '</ul></div>';
+            }
+            
+            html += '</div>';
+            
+            document.getElementById('model-details').innerHTML = html;
+        }
+        
+        function fitNetwork() {
+            network.fit();
+        }
+        
+        function showAllNodes() {
+            nodes.clear();
+            nodes.add([{"id": "raw_forecast_cycle", "label": "raw_forecast_cycle", "title": "<b>raw_forecast_cycle</b><br>Layer: bronze<br>Kind: VIEW<br>Owner: data_engineering<br>Domain: planning<br>Description: Raw forecast cycle data from source systems<br>Columns: 6", "group": "bronze", "shape": "ellipse", "color": "#87CEEB", "font": {"size": 12}, "physics": true}, {"id": "active_forecast_cycles", "label": "active_forecast_cycles", "title": "<b>active_forecast_cycles</b><br>Layer: cte<br>Kind: CTE<br>Owner: data_engineering<br>Domain: planning<br>Description: Filter for active forecast cycles only<br>Columns: 4", "group": "cte", "shape": "diamond", "color": "#D3D3D3", "font": {"size": 12}, "physics": true}, {"id": "fct_ForecastCycle", "label": "fct_ForecastCycle", "title": "<b>fct_ForecastCycle</b><br>Layer: gold<br>Kind: TABLE<br>Owner: data_engineering<br>Domain: planning<br>Description: Fact table for forecast cycles - matches your JSON structure<br>Columns: 6", "group": "gold", "shape": "box", "color": "#FFD700", "font": {"size": 12}, "physics": true}, {"id": "clean_forecast_cycle", "label": "clean_forecast_cycle", "title": "<b>clean_forecast_cycle</b><br>Layer: silver<br>Kind: TABLE<br>Owner: data_engineering<br>Domain: planning<br>Description: Cleaned and standardized forecast cycle data<br>Columns: 9", "group": "silver", "shape": "box", "color": "#98FB98", "font": {"size": 12}, "physics": true}]);
+            edges.clear();
+            edges.add([{"id": 0, "from": "raw_forecast_cycle", "to": "active_forecast_cycles", "arrows": "to", "color": {"color": "#848484"}, "width": 2, "title": "raw_forecast_cycle \u2192 active_forecast_cycles"}, {"id": 1, "from": "clean_forecast_cycle", "to": "fct_ForecastCycle", "arrows": "to", "color": {"color": "#848484"}, "width": 2, "title": "clean_forecast_cycle \u2192 fct_ForecastCycle"}, {"id": 2, "from": "active_forecast_cycles", "to": "fct_ForecastCycle", "arrows": "to", "color": {"color": "#2E86C1"}, "width": 2, "title": "active_forecast_cycles \u2192 fct_ForecastCycle (CTE)", "dashes": true}, {"id": 3, "from": "raw_forecast_cycle", "to": "clean_forecast_cycle", "arrows": "to", "color": {"color": "#848484"}, "width": 2, "title": "raw_forecast_cycle \u2192 clean_forecast_cycle"}]);
+        }
+        
+        function filterByLayer() {
+            var selectedLayer = document.getElementById('layerFilter').value;
+            
+            if (selectedLayer === '') {
+                showAllNodes();
+                return;
+            }
+            
+            var filteredNodes = [{"id": "raw_forecast_cycle", "label": "raw_forecast_cycle", "title": "<b>raw_forecast_cycle</b><br>Layer: bronze<br>Kind: VIEW<br>Owner: data_engineering<br>Domain: planning<br>Description: Raw forecast cycle data from source systems<br>Columns: 6", "group": "bronze", "shape": "ellipse", "color": "#87CEEB", "font": {"size": 12}, "physics": true}, {"id": "active_forecast_cycles", "label": "active_forecast_cycles", "title": "<b>active_forecast_cycles</b><br>Layer: cte<br>Kind: CTE<br>Owner: data_engineering<br>Domain: planning<br>Description: Filter for active forecast cycles only<br>Columns: 4", "group": "cte", "shape": "diamond", "color": "#D3D3D3", "font": {"size": 12}, "physics": true}, {"id": "fct_ForecastCycle", "label": "fct_ForecastCycle", "title": "<b>fct_ForecastCycle</b><br>Layer: gold<br>Kind: TABLE<br>Owner: data_engineering<br>Domain: planning<br>Description: Fact table for forecast cycles - matches your JSON structure<br>Columns: 6", "group": "gold", "shape": "box", "color": "#FFD700", "font": {"size": 12}, "physics": true}, {"id": "clean_forecast_cycle", "label": "clean_forecast_cycle", "title": "<b>clean_forecast_cycle</b><br>Layer: silver<br>Kind: TABLE<br>Owner: data_engineering<br>Domain: planning<br>Description: Cleaned and standardized forecast cycle data<br>Columns: 9", "group": "silver", "shape": "box", "color": "#98FB98", "font": {"size": 12}, "physics": true}].filter(function(node) {
+                return node.group === selectedLayer;
+            });
+            
+            var nodeIds = filteredNodes.map(function(node) { return node.id; });
+            var filteredEdges = [{"id": 0, "from": "raw_forecast_cycle", "to": "active_forecast_cycles", "arrows": "to", "color": {"color": "#848484"}, "width": 2, "title": "raw_forecast_cycle \u2192 active_forecast_cycles"}, {"id": 1, "from": "clean_forecast_cycle", "to": "fct_ForecastCycle", "arrows": "to", "color": {"color": "#848484"}, "width": 2, "title": "clean_forecast_cycle \u2192 fct_ForecastCycle"}, {"id": 2, "from": "active_forecast_cycles", "to": "fct_ForecastCycle", "arrows": "to", "color": {"color": "#2E86C1"}, "width": 2, "title": "active_forecast_cycles \u2192 fct_ForecastCycle (CTE)", "dashes": true}, {"id": 3, "from": "raw_forecast_cycle", "to": "clean_forecast_cycle", "arrows": "to", "color": {"color": "#848484"}, "width": 2, "title": "raw_forecast_cycle \u2192 clean_forecast_cycle"}].filter(function(edge) {
+                return nodeIds.includes(edge.from) && nodeIds.includes(edge.to);
+            });
+            
+            nodes.clear();
+            nodes.add(filteredNodes);
+            edges.clear();
+            edges.add(filteredEdges);
+        }
+        
+        function focusOnModel() {
+            var selectedModel = document.getElementById('modelSelect').value;
+            if (selectedModel === '') return;
+            
+            network.focus(selectedModel, {
+                scale: 1.0,
+                animation: {
+                    duration: 1000,
+                    easingFunction: 'easeInOutQuad'
+                }
+            });
+            
+            showModelDetails(selectedModel);
+        }
+    </script>
+</body>
+</html>

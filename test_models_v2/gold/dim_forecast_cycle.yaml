@@ -1,0 +1,90 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 1: MODEL METADATA
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: dim_forecast_cycle
+  description: "Gold layer forecast cycle dimension table"
+  layer: gold
+  kind: TABLE
+  owner: unison insights
+  tags: [gold, dimension, forecast, cycle]
+  domain: product
+  refresh_frequency: daily
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 2: DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: slv_forecast_cycle
+  depends_on_tables:
+    - slv_forecast_cycle
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 3: COLUMN TRANSFORMATIONS
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    - name: forecast_cycle_key
+      reference_table: slv_forecast_cycle
+      expression: "forecast_cycle_id"
+      description: "Dimension key for forecast cycle"
+      data_type: INTEGER
+    - name: forecast_cycle_id
+      reference_table: slv_forecast_cycle
+      expression: ""
+      description: "Business key for forecast cycle"
+      data_type: INTEGER
+    - name: cycle_label
+      reference_table: slv_forecast_cycle
+      expression: ""
+      description: "Human readable cycle label"
+      data_type: VARCHAR(20)
+    - name: period_start
+      reference_table: slv_forecast_cycle
+      expression: ""
+      description: "Cycle start date"
+      data_type: DATE
+    - name: period_end
+      reference_table: slv_forecast_cycle
+      expression: ""
+      description: "Cycle end date"
+      data_type: DATE
+    - name: cycle_duration_days
+      reference_table: slv_forecast_cycle
+      expression: ""
+      description: "Duration in days"
+      data_type: INTEGER
+    - name: cycle_year
+      reference_table: slv_forecast_cycle
+      expression: ""
+      description: "Cycle year"
+      data_type: INTEGER
+    - name: cycle_month
+      reference_table: slv_forecast_cycle
+      expression: ""
+      description: "Cycle month"
+      data_type: INTEGER
+    - name: is_current_month
+      reference_table: slv_forecast_cycle
+      expression: ""
+      description: "Current month flag"
+      data_type: BIT
+    - name: is_historical
+      reference_table: slv_forecast_cycle
+      expression: ""
+      description: "Historical flag"
+      data_type: BIT
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 7: DATA QUALITY RULES
+# ═══════════════════════════════════════════════════════════════════════════
+audits:
+  not_null: [forecast_cycle_key, forecast_cycle_id, cycle_label]
+  positive_values: [forecast_cycle_key, forecast_cycle_id]
+  unique_combination: [forecast_cycle_key]
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 8: TABLE GRAIN DEFINITION
+# ═══════════════════════════════════════════════════════════════════════════
+grain:
+  - forecast_cycle_key

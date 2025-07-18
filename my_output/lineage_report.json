@@ -1,0 +1,66 @@
+{
+  "raw_forecast_cycle": {
+    "name": "raw_forecast_cycle",
+    "dependencies": [],
+    "layer": "bronze",
+    "kind": "VIEW",
+    "columns": [
+      "ForecastCycleId",
+      "PeriodStart",
+      "PeriodEnd",
+      "CycleName",
+      "Status",
+      "CreatedDate"
+    ]
+  },
+  "active_forecast_cycles": {
+    "name": "active_forecast_cycles",
+    "dependencies": [
+      "raw_forecast_cycle"
+    ],
+    "layer": "cte",
+    "kind": "CTE",
+    "columns": [
+      "ForecastCycleId",
+      "PeriodStart",
+      "PeriodEnd",
+      "CycleName"
+    ]
+  },
+  "fct_ForecastCycle": {
+    "name": "fct_ForecastCycle",
+    "dependencies": [
+      "clean_forecast_cycle",
+      "active_forecast_cycles"
+    ],
+    "layer": "gold",
+    "kind": "TABLE",
+    "columns": [
+      "ForecastCycle_Id",
+      "PeriodEnd",
+      "PeriodStart",
+      "CycleName",
+      "PeriodDays",
+      "IsActive"
+    ]
+  },
+  "clean_forecast_cycle": {
+    "name": "clean_forecast_cycle",
+    "dependencies": [
+      "raw_forecast_cycle"
+    ],
+    "layer": "silver",
+    "kind": "TABLE",
+    "columns": [
+      "ForecastCycleId",
+      "PeriodStart",
+      "PeriodEnd",
+      "CycleName",
+      "Status",
+      "PeriodDays",
+      "IsCurrentCycle",
+      "CreatedDate",
+      "LoadTimestamp"
+    ]
+  }
+}

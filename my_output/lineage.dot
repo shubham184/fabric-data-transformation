@@ -1,0 +1,12 @@
+digraph lineage {
+  rankdir=LR;
+  node [shape=record];
+  "raw_forecast_cycle" [label="raw_forecast_cycle\n(bronze)"];
+  "active_forecast_cycles" [label="active_forecast_cycles\n(cte)"];
+  "fct_ForecastCycle" [label="fct_ForecastCycle\n(gold)"];
+  "clean_forecast_cycle" [label="clean_forecast_cycle\n(silver)"];
+  "raw_forecast_cycle" -> "active_forecast_cycles" [label="dependency"];
+  "raw_forecast_cycle" -> "clean_forecast_cycle" [label="dependency"];
+  "active_forecast_cycles" -> "fct_ForecastCycle" [label="dependency"];
+  "clean_forecast_cycle" -> "fct_ForecastCycle" [label="dependency"];
+}

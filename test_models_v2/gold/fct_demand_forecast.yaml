@@ -1,0 +1,121 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 1: MODEL METADATA
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: fct_demand_forecast
+  description: "Gold layer lean fact table for demand forecasting with dimensional keys"
+  layer: gold
+  kind: TABLE
+  owner: unison insights
+  tags: [gold, fact, demand, forecast]
+  domain: product
+  refresh_frequency: daily
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 2: DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: slv_demand_storage
+  depends_on_tables:
+    - slv_demand_storage
+    - dim_forecast_cycle
+    - dim_forecast_group
+    - dim_forecast_item
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 3: COLUMN TRANSFORMATIONS
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    # Dimensional foreign keys
+    - name: forecast_cycle_key
+      reference_table: dim_forecast_cycle
+      expression: "forecast_cycle_key"
+      description: "Foreign key to forecast cycle dimension"
+      data_type: INTEGER
+    - name: forecast_group_key
+      reference_table: dim_forecast_group
+      expression: "forecast_group_key"
+      description: "Foreign key to forecast group dimension"
+      data_type: INTEGER
+    - name: forecast_item_key
+      reference_table: dim_forecast_item
+      expression: "forecast_item_key"
+      description: "Foreign key to forecast item dimension"
+      data_type: INTEGER
+    
+    # Core measures
+    - name: base_quantity
+      reference_table: slv_demand_storage
+      expression: ""
+      description: "Base forecast quantity"
+      data_type: DECIMAL(18,2)
+    - name: calculated_quantity
+      reference_table: slv_demand_storage
+      expression: ""
+      description: "Calculated forecast quantity"
+      data_type: DECIMAL(18,2)
+    - name: quantity_variance
+      reference_table: slv_demand_storage
+      expression: ""
+      description: "Quantity variance"
+      data_type: DECIMAL(18,2)
+    - name: quantity_variance_pct
+      reference_table: slv_demand_storage
+      expression: ""
+      description: "Quantity variance percentage"
+      data_type: DECIMAL(10,4)
+    
+    # Quality indicators as measures
+    - name: is_zero_quantity
+      reference_table: slv_demand_storage
+      expression: ""
+      description: "Zero quantity flag"
+      data_type: BIT
+    - name: is_high_variance
+      reference_table: slv_demand_storage
+      expression: ""
+      description: "High variance flag"
+      data_type: BIT
+    - name: is_negative_quantity
+      reference_table: slv_demand_storage
+      expression: ""
+      description: "Negative quantity flag"
+      data_type: BIT
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 7: DATA QUALITY RULES
+# ═══════════════════════════════════════════════════════════════════════════
+audits:
+  not_null: [forecast_cycle_key, forecast_group_key, forecast_item_key, base_quantity, calculated_quantity]
+  positive_values: [forecast_cycle_key, forecast_group_key, forecast_item_key]
+  unique_combination: [forecast_cycle_key, forecast_group_key, forecast_item_key]
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 8: TABLE GRAIN DEFINITION
+# ═══════════════════════════════════════════════════════════════════════════
+grain:
+  - forecast_cycle_key
+  - forecast_group_key
+  - forecast_item_key
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 9: TABLE RELATIONSHIPS
+# ═══════════════════════════════════════════════════════════════════════════
+relationships:
+  foreign_keys:
+    - local_column: forecast_cycle_key
+      references_table: dim_forecast_cycle
+      references_column: forecast_cycle_key
+      relationship_type: many-to-one
+      join_type: INNER
+    - local_column: forecast_group_key
+      references_table: dim_forecast_group
+      references_column: forecast_group_key
+      relationship_type: many-to-one
+      join_type: INNER
+    - local_column: forecast_item_key
+      references_table: dim_forecast_item
+      references_column: forecast_item_key
+      relationship_type: many-to-one
+      join_type: INNER

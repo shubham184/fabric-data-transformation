@@ -1,0 +1,162 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 1: MODEL METADATA
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: fct_demand_summary
+  description: "Gold layer aggregated demand summary by cycle and group with dimensional keys"
+  layer: gold
+  kind: TABLE
+  owner: unison insights
+  tags: [gold, fact, demand, summary, aggregated]
+  domain: product
+  refresh_frequency: daily
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 2: DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: fct_demand_forecast
+  depends_on_tables:
+    - fct_demand_forecast
+    - dim_forecast_cycle
+    - dim_forecast_group
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 3: COLUMN TRANSFORMATIONS
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    # Group by dimensions (from related dimension tables)
+    - name: forecast_cycle_key
+      reference_table: fct_demand_forecast
+      expression: ""
+      description: "Foreign key to forecast cycle dimension"
+      data_type: INTEGER
+    - name: forecast_group_key
+      reference_table: fct_demand_forecast
+      expression: ""
+      description: "Foreign key to forecast group dimension"
+      data_type: INTEGER
+    - name: cycle_label
+      reference_table: dim_forecast_cycle
+      expression: ""
+      description: "Human readable cycle label"
+      data_type: VARCHAR(20)
+    - name: group_name
+      reference_table: dim_forecast_group
+      expression: ""
+      description: "Group name"
+      data_type: VARCHAR(255)
+    - name: period_start
+      reference_table: dim_forecast_cycle
+      expression: ""
+      description: "Forecast period start date"
+      data_type: DATE
+    - name: period_end
+      reference_table: dim_forecast_cycle
+      expression: ""
+      description: "Forecast period end date"
+      data_type: DATE
+    
+    # Aggregated measures
+    - name: total_base_quantity
+      reference_table: fct_demand_forecast
+      expression: "SUM(base_quantity)"
+      description: "Total base quantity for the group"
+      data_type: DECIMAL(18,2)
+    - name: total_calculated_quantity
+      reference_table: fct_demand_forecast
+      expression: "SUM(calculated_quantity)"
+      description: "Total calculated quantity for the group"
+      data_type: DECIMAL(18,2)
+    - name: avg_quantity_variance_pct
+      reference_table: fct_demand_forecast
+      expression: "AVG(quantity_variance_pct)"
+      description: "Average quantity variance percentage"
+      data_type: DECIMAL(10,4)
+    - name: total_quantity_variance
+      reference_table: fct_demand_forecast
+      expression: "SUM(quantity_variance)"
+      description: "Total absolute quantity variance"
+      data_type: DECIMAL(18,2)
+    - name: item_count
+      reference_table: fct_demand_forecast
+      expression: "COUNT(forecast_item_key)"
+      description: "Number of forecast items in the group"
+      data_type: INTEGER
+    - name: zero_quantity_count
+      reference_table: fct_demand_forecast
+      expression: "SUM(CASE WHEN is_zero_quantity = 1 THEN 1 ELSE 0 END)"
+      description: "Number of zero quantity items"
+      data_type: INTEGER
+    - name: high_variance_count
+      reference_table: fct_demand_forecast
+      expression: "SUM(CASE WHEN is_high_variance = 1 THEN 1 ELSE 0 END)"
+      description: "Number of high variance items"
+      data_type: INTEGER
+    - name: negative_quantity_count
+      reference_table: fct_demand_forecast
+      expression: "SUM(CASE WHEN is_negative_quantity = 1 THEN 1 ELSE 0 END)"
+      description: "Number of negative quantity items"
+      data_type: INTEGER
+    - name: max_base_quantity
+      reference_table: fct_demand_forecast
+      expression: "MAX(base_quantity)"
+      description: "Maximum base quantity in the group"
+      data_type: DECIMAL(18,2)
+    - name: min_base_quantity
+      reference_table: fct_demand_forecast
+      expression: "MIN(base_quantity)"
+      description: "Minimum base quantity in the group"
+      data_type: DECIMAL(18,2)
+    - name: avg_base_quantity
+      reference_table: fct_demand_forecast
+      expression: "AVG(base_quantity)"
+      description: "Average base quantity in the group"
+      data_type: DECIMAL(18,2)
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 6: AGGREGATION LOGIC
+# ═══════════════════════════════════════════════════════════════════════════
+aggregations:
+  group_by:
+    - forecast_cycle_key
+    - forecast_group_key
+    - cycle_label
+    - group_name
+    - period_start
+    - period_end
+  having:
+    - "total_base_quantity > 0"
+    - "item_count >= 1"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 7: DATA QUALITY RULES
+# ═══════════════════════════════════════════════════════════════════════════
+audits:
+  not_null: [forecast_cycle_key, forecast_group_key, total_base_quantity, item_count]
+  positive_values: [forecast_cycle_key, forecast_group_key, total_base_quantity, item_count]
+  unique_combination: [forecast_cycle_key, forecast_group_key]
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 8: TABLE GRAIN DEFINITION
+# ═══════════════════════════════════════════════════════════════════════════
+grain:
+  - forecast_cycle_key
+  - forecast_group_key
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 9: TABLE RELATIONSHIPS
+# ═══════════════════════════════════════════════════════════════════════════
+relationships:
+  foreign_keys:
+    - local_column: forecast_cycle_key
+      references_table: dim_forecast_cycle
+      references_column: forecast_cycle_key
+      relationship_type: many-to-one
+      join_type: INNER
+    - local_column: forecast_group_key
+      references_table: dim_forecast_group
+      references_column: forecast_group_key
+      relationship_type: many-to-one
+      join_type: INNER

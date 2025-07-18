@@ -1,0 +1,203 @@
+{
+  "active_forecast_cycles": {
+    "columns": [
+      {
+        "description": "Name of the forecast cycle",
+        "name": "CycleName",
+        "nullable": true,
+        "type": null
+      },
+      {
+        "description": "Unique forecast cycle identifier",
+        "name": "ForecastCycleId",
+        "nullable": true,
+        "type": null
+      },
+      {
+        "description": "End date of forecast period",
+        "name": "PeriodEnd",
+        "nullable": true,
+        "type": null
+      },
+      {
+        "description": "Start date of forecast period",
+        "name": "PeriodStart",
+        "nullable": true,
+        "type": null
+      }
+    ],
+    "dependencies": [
+      "raw_forecast_cycle"
+    ],
+    "kind": "CTE",
+    "layer": "cte",
+    "logic_hash": "03a3c8e0e7e892c1",
+    "metadata_hash": "2e51fecd7cb991fa",
+    "name": "active_forecast_cycles",
+    "schema_hash": "c92137f08cd6b8d2"
+  },
+  "clean_forecast_cycle": {
+    "columns": [
+      {
+        "description": "Date when cycle was created",
+        "name": "CreatedDate",
+        "nullable": true,
+        "type": null
+      },
+      {
+        "description": "Standardized cycle name",
+        "name": "CycleName",
+        "nullable": true,
+        "type": null
+      },
+      {
+        "description": "Cleaned forecast cycle identifier",
+        "name": "ForecastCycleId",
+        "nullable": true,
+        "type": null
+      },
+      {
+        "description": "Flag indicating if this is the current active cycle",
+        "name": "IsCurrentCycle",
+        "nullable": true,
+        "type": null
+      },
+      {
+        "description": "Timestamp when record was loaded",
+        "name": "LoadTimestamp",
+        "nullable": true,
+        "type": null
+      },
+      {
+        "description": "Number of days in the forecast period",
+        "name": "PeriodDays",
+        "nullable": true,
+        "type": null
+      },
+      {
+        "description": "End date of forecast period",
+        "name": "PeriodEnd",
+        "nullable": true,
+        "type": null
+      },
+      {
+        "description": "Start date of forecast period",
+        "name": "PeriodStart",
+        "nullable": true,
+        "type": null
+      },
+      {
+        "description": "Standardized status",
+        "name": "Status",
+        "nullable": true,
+        "type": null
+      }
+    ],
+    "dependencies": [
+      "raw_forecast_cycle"
+    ],
+    "kind": "TABLE",
+    "layer": "silver",
+    "logic_hash": "eb53650a7d0a113d",
+    "metadata_hash": "923f8e6636a64023",
+    "name": "clean_forecast_cycle",
+    "schema_hash": "c426b81a598d7e29"
+  },
+  "fct_ForecastCycle": {
+    "columns": [
+      {
+        "description": "Standardized cycle name",
+        "name": "CycleName",
+        "nullable": true,
+        "type": null
+      },
+      {
+        "description": "Forecast cycle identifier (matches your JSON)",
+        "name": "ForecastCycle_Id",
+        "nullable": true,
+        "type": null
+      },
+      {
+        "description": "Flag indicating if cycle is active",
+        "name": "IsActive",
+        "nullable": true,
+        "type": null
+      },
+      {
+        "description": "Number of days in forecast period",
+        "name": "PeriodDays",
+        "nullable": true,
+        "type": null
+      },
+      {
+        "description": "Period end date (matches your JSON)",
+        "name": "PeriodEnd",
+        "nullable": true,
+        "type": null
+      },
+      {
+        "description": "Period start date (matches your JSON)",
+        "name": "PeriodStart",
+        "nullable": true,
+        "type": null
+      }
+    ],
+    "dependencies": [
+      "clean_forecast_cycle",
+      "active_forecast_cycles"
+    ],
+    "kind": "TABLE",
+    "layer": "gold",
+    "logic_hash": "b7aa7776cea46c35",
+    "metadata_hash": "17fb1dcb753cd2f6",
+    "name": "fct_ForecastCycle",
+    "schema_hash": "f2f3702f6a30558b"
+  },
+  "raw_forecast_cycle": {
+    "columns": [
+      {
+        "description": "Date when cycle was created",
+        "name": "CreatedDate",
+        "nullable": true,
+        "type": null
+      },
+      {
+        "description": "Name of the forecast cycle",
+        "name": "CycleName",
+        "nullable": true,
+        "type": null
+      },
+      {
+        "description": "Unique forecast cycle identifier",
+        "name": "ForecastCycleId",
+        "nullable": true,
+        "type": null
+      },
+      {
+        "description": "End date of forecast period",
+        "name": "PeriodEnd",
+        "nullable": true,
+        "type": null
+      },
+      {
+        "description": "Start date of forecast period",
+        "name": "PeriodStart",
+        "nullable": true,
+        "type": null
+      },
+      {
+        "description": "Status of the forecast cycle",
+        "name": "Status",
+        "nullable": true,
+        "type": null
+      }
+    ],
+    "dependencies": [],
+    "kind": "VIEW",
+    "layer": "bronze",
+    "logic_hash": "92f663feac5082e4",
+    "metadata_hash": "00c361c00111760a",
+    "name": "raw_forecast_cycle",
+    "schema_hash": "40787178a24732e0"
+  }
+}

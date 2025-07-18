@@ -1,0 +1,161 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 1: MODEL METADATA
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: dim_forecast_item
+  description: "Gold layer forecast item dimension table with all descriptive attributes"
+  layer: gold
+  kind: TABLE
+  owner: unison insights
+  tags: [gold, dimension, forecast, item]
+  domain: product
+  refresh_frequency: daily
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 2: DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: slv_forecast_item
+  depends_on_tables:
+    - slv_forecast_item
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 3: COLUMN TRANSFORMATIONS
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    # Dimension keys
+    - name: forecast_item_key
+      reference_table: slv_forecast_item
+      expression: "pk_forecast_item_id"
+      description: "Dimension key for forecast item"
+      data_type: INTEGER
+    - name: forecast_item_id
+      reference_table: slv_forecast_item
+      expression: ""
+      description: "Business key for forecast item"
+      data_type: INTEGER
+    
+    # Core business identifiers
+    - name: product_id
+      reference_table: slv_forecast_item
+      expression: ""
+      description: "Product identifier"
+      data_type: INTEGER
+    - name: customer_id
+      reference_table: slv_forecast_item
+      expression: ""
+      description: "Customer identifier"
+      data_type: INTEGER
+    - name: currency_id
+      reference_table: slv_forecast_item
+      expression: ""
+      description: "Currency identifier"
+      data_type: INTEGER
+    - name: business_segment_id
+      reference_table: slv_forecast_item
+      expression: ""
+      description: "Business segment identifier"
+      data_type: INTEGER
+    - name: forecast_type_id
+      reference_table: slv_forecast_item
+      expression: ""
+      description: "Forecast type identifier"
+      data_type: INTEGER
+    - name: location_id
+      reference_table: slv_forecast_item
+      expression: ""
+      description: "Location identifier"
+      data_type: INTEGER
+    
+    # Geographic attributes
+    - name: country
+      reference_table: slv_forecast_item
+      expression: ""
+      description: "Country code"
+      data_type: VARCHAR(10)
+    - name: subregion
+      reference_table: slv_forecast_item
+      expression: ""
+      description: "Subregion"
+      data_type: VARCHAR(100)
+    - name: ultimate_destination
+      reference_table: slv_forecast_item
+      expression: ""
+      description: "Ultimate destination"
+      data_type: VARCHAR(100)
+    - name: is_international
+      reference_table: slv_forecast_item
+      expression: ""
+      description: "International flag"
+      data_type: BIT
+    
+    # Business classifications
+    - name: priority
+      reference_table: slv_forecast_item
+      expression: ""
+      description: "Priority level"
+      data_type: VARCHAR(50)
+    - name: customer_segment
+      reference_table: slv_forecast_item
+      expression: ""
+      description: "Customer segment"
+      data_type: VARCHAR(100)
+    - name: customer_priority
+      reference_table: slv_forecast_item
+      expression: ""
+      description: "Customer priority"
+      data_type: VARCHAR(50)
+    - name: demand_family
+      reference_table: slv_forecast_item
+      expression: ""
+      description: "Demand family"
+      data_type: VARCHAR(100)
+    - name: derived_lob
+      reference_table: slv_forecast_item
+      expression: ""
+      description: "Line of business"
+      data_type: VARCHAR(100)
+    
+    # Business flags
+    - name: is_high_priority
+      reference_table: slv_forecast_item
+      expression: ""
+      description: "High priority flag"
+      data_type: BIT
+    - name: is_strategic_customer
+      reference_table: slv_forecast_item
+      expression: ""
+      description: "Strategic customer flag"
+      data_type: BIT
+    
+    # Industry enrichment
+    - name: industry_value_1
+      reference_table: slv_forecast_item
+      expression: ""
+      description: "Industry value 1"
+      data_type: DECIMAL(18,4)
+    - name: industry_value_2
+      reference_table: slv_forecast_item
+      expression: ""
+      description: "Industry value 2"
+      data_type: DECIMAL(18,4)
+    - name: industry_value_3
+      reference_table: slv_forecast_item
+      expression: ""
+      description: "Industry value 3"
+      data_type: DECIMAL(18,4)
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 7: DATA QUALITY RULES
+# ═══════════════════════════════════════════════════════════════════════════
+audits:
+  not_null: [forecast_item_key, forecast_item_id, product_id, country, priority]
+  positive_values: [forecast_item_key, forecast_item_id, product_id]
+  unique_combination: [forecast_item_key]
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 8: TABLE GRAIN DEFINITION
+# ═══════════════════════════════════════════════════════════════════════════
+grain:
+  - forecast_item_key
