@@ -1,0 +1,55 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# INDUSTRY_VALUES_CTE - Industry-specific values
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: industry_values_cte
+  description: "CTE for industry-specific values and alternative subregion mapping"
+  layer: cte
+  kind: CTE
+  owner: industry_team
+  tags: [industry, cte, values]
+  domain: industry
+  refresh_frequency: daily
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: IndustryTable
+  depends_on_tables:
+    - IndustryTable
+
+# ═══════════════════════════════════════════════════════════════════════════
+# COLUMN TRANSFORMATIONS
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    - name: FORECASTITEMID
+      reference_table: IndustryTable
+      expression: "FORECASTITEMID"
+      description: "Forecast item identifier for joining"
+      data_type: VARCHAR(50)
+
+    - name: value1
+      reference_table: IndustryTable
+      expression: "value1"
+      description: "Industry value 1"
+      data_type: VARCHAR(255)
+
+    - name: value2
+      reference_table: IndustryTable
+      expression: "Value2"
+      description: "Industry value 2"
+      data_type: VARCHAR(255)
+
+    - name: value3
+      reference_table: IndustryTable
+      expression: "Value3"
+      description: "Industry value 3"
+      data_type: VARCHAR(255)
+
+    - name: Alterative_subregion
+      reference_table: IndustryTable
+      expression: "Alterative_subregion"
+      description: "Alternative subregion classification for industry"
+      data_type: VARCHAR(50)

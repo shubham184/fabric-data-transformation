@@ -1,0 +1,139 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# FCT_FORECASTITEM - Customer Silver Layer
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: FCT_FORECASTITEM_silver_customer
+  description: "Customer vertical silver layer - applies customer-specific filtering to industry data"
+  layer: silver
+  kind: VIEW
+  owner: customer_team
+  tags: [forecast, item, dimension, silver, customer, filtered]
+  domain: customer
+  refresh_frequency: daily
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: FCT_FORECASTITEM_silver_industry
+  depends_on_tables:
+    - FCT_FORECASTITEM_silver_industry  # Building on industry silver
+    - fct_forecastitem                  # Bronze table for filtering
+    - IndustryTable                     # For customer-filtered CTE
+    - customer_industry_values_cte      # Customer-specific CTE
+
+# ═══════════════════════════════════════════════════════════════════════════
+# COMMON TABLE EXPRESSIONS
+# ═══════════════════════════════════════════════════════════════════════════
+ctes:
+  ctes:
+    - customer_industry_values_cte
+
+# ═══════════════════════════════════════════════════════════════════════════
+# COLUMN TRANSFORMATIONS
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    # Selectively inherit needed columns from industry silver
+    - name: PK_FORECASTITEM_ID
+      reference_table: FCT_FORECASTITEM_silver_industry
+      expression: "PK_FORECASTITEM_ID"
+      description: "Primary key for forecast item"
+      data_type: INTEGER
+
+    - name: FORECASTITEMID
+      reference_table: FCT_FORECASTITEM_silver_industry
+      expression: "FORECASTITEMID"
+      description: "Business key for forecast item"
+      data_type: VARCHAR(50)
+
+    - name: PRODUCTID
+      reference_table: FCT_FORECASTITEM_silver_industry
+      expression: "PRODUCTID"
+      description: "Product identifier"
+      data_type: VARCHAR(50)
+
+    - name: CUSTOMERID
+      reference_table: FCT_FORECASTITEM_silver_industry
+      expression: "CUSTOMERID"
+      description: "Customer identifier"
+      data_type: VARCHAR(50)
+
+    - name: COUNTRY
+      reference_table: FCT_FORECASTITEM_silver_industry
+      expression: "COUNTRY"
+      description: "Country code"
+      data_type: VARCHAR(3)
+
+    - name: CUSTOMERSEGMENT
+      reference_table: FCT_FORECASTITEM_silver_industry
+      expression: "CUSTOMERSEGMENT"
+      description: "Customer segment classification"
+      data_type: VARCHAR(50)
+
+    - name: DEMANDFAMILY
+      reference_table: FCT_FORECASTITEM_silver_industry
+      expression: "DEMANDFAMILY"
+      description: "Demand family classification"
+      data_type: VARCHAR(50)
+
+    - name: SUBREGION
+      reference_table: FCT_FORECASTITEM_silver_industry
+      expression: "SUBREGION"
+      description: "Subregion classification (from industry)"
+      data_type: VARCHAR(50)
+
+    # Industry columns carried forward
+    - name: INDUSTRY1_COLUMN1
+      reference_table: FCT_FORECASTITEM_silver_industry
+      expression: "INDUSTRY1_COLUMN1"
+      description: "Industry-specific value 1"
+      data_type: VARCHAR(255)
+
+    - name: INDUSTRY1_COLUMN2
+      reference_table: FCT_FORECASTITEM_silver_industry
+      expression: "INDUSTRY1_COLUMN2"
+      description: "Industry-specific value 2"
+      data_type: VARCHAR(255)
+
+    - name: INDUSTRY1_COLUMN3
+      reference_table: FCT_FORECASTITEM_silver_industry
+      expression: "INDUSTRY1_COLUMN3"
+      description: "Industry-specific value 3 (conditional)"
+      data_type: VARCHAR(255)
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATA FILTERING
+# ═══════════════════════════════════════════════════════════════════════════
+filters:
+  where_conditions:
+    # Customer-specific filter on the base bronze table
+    - reference_table: fct_forecastitem
+      condition: "Tempflag = 0"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# TABLE RELATIONSHIPS
+# ═══════════════════════════════════════════════════════════════════════════
+relationships:
+  foreign_keys:
+    # Join to customer-filtered industry CTE if needed
+    - local_column: FORECASTITEMID
+      references_table: customer_industry_values_cte
+      references_column: FORECASTITEMID
+      relationship_type: one-to-one
+      join_type: LEFT
+
+# ═══════════════════════════════════════════════════════════════════════════
+# TABLE GRAIN DEFINITION
+# ═══════════════════════════════════════════════════════════════════════════
+grain:
+  - PK_FORECASTITEM_ID
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATA QUALITY RULES
+# ═══════════════════════════════════════════════════════════════════════════
+audits:
+  not_null:
+    - PK_FORECASTITEM_ID
+    - FORECASTITEMID
+    - CUSTOMERID

@@ -1,0 +1,151 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# FCT_FORECASTITEM - Product Silver Layer
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: FCT_FORECASTITEM_silver_product
+  description: "Product vertical silver layer - standardized forecast items"
+  layer: silver
+  kind: TABLE
+  owner: product_team
+  tags: [forecast, item, dimension, silver, product]
+  domain: product
+  refresh_frequency: daily
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: fct_forecastitem
+  depends_on_tables:
+    - fct_forecastitem
+
+# ═══════════════════════════════════════════════════════════════════════════
+# COLUMN TRANSFORMATIONS
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    - name: PK_FORECASTITEM_ID
+      reference_table: fct_forecastitem
+      expression: "@newpk()"
+      description: "Generated primary key for forecast item"
+      data_type: INTEGER
+
+    - name: FK_ITEMSEGMENTATION_ID
+      reference_table: fct_forecastitem
+      expression: "FK_ITEMSEGMENTATION_ID"
+      description: "Foreign key to item segmentation"
+      data_type: INTEGER
+
+    - name: FK_NODESEGMENTATION_ID
+      reference_table: fct_forecastitem
+      expression: "FK_NODESEGMENTATION_ID"
+      description: "Foreign key to node segmentation"
+      data_type: INTEGER
+
+    - name: FORECASTITEMID
+      reference_table: fct_forecastitem
+      expression: "FORECASTITEMID"
+      description: "Business key for forecast item"
+      data_type: VARCHAR(50)
+
+    - name: PRODUCTID
+      reference_table: fct_forecastitem
+      expression: "PRODUCTID"
+      description: "Product identifier"
+      data_type: VARCHAR(50)
+
+    - name: CURRENCYID
+      reference_table: fct_forecastitem
+      expression: "CURRENCYID"
+      description: "Currency code"
+      data_type: VARCHAR(3)
+
+    - name: CUSTOMERID
+      reference_table: fct_forecastitem
+      expression: "CUSTOMERID"
+      description: "Customer identifier"
+      data_type: VARCHAR(50)
+
+    - name: BUSINESSSEGMENTID
+      reference_table: fct_forecastitem
+      expression: "BUSINESSSEGMENTID"
+      description: "Business segment identifier"
+      data_type: VARCHAR(50)
+
+    - name: COUNTRY
+      reference_table: fct_forecastitem
+      expression: "COUNTRY"
+      description: "Country code"
+      data_type: VARCHAR(3)
+
+    - name: PRIORITY
+      reference_table: fct_forecastitem
+      expression: "PRIORITY"
+      description: "Priority level"
+      data_type: INTEGER
+
+    - name: ULTIMATEDESTINATION
+      reference_table: fct_forecastitem
+      expression: "ULTIMATEDESTINATION"
+      description: "Ultimate destination location"
+      data_type: VARCHAR(100)
+
+    - name: CUSTOMERSEGMENT
+      reference_table: fct_forecastitem
+      expression: "CUSTOMERSEGMENT"
+      description: "Customer segment classification"
+      data_type: VARCHAR(50)
+
+    - name: CUSTOMER_PRIORITY
+      reference_table: fct_forecastitem
+      expression: "CUSTOMER_PRIORITY"
+      description: "Customer priority level"
+      data_type: INTEGER
+
+    - name: DEMANDFAMILY
+      reference_table: fct_forecastitem
+      expression: "DEMANDFAMILY"
+      description: "Demand family classification"
+      data_type: VARCHAR(50)
+
+    - name: FORECASTTYPEID
+      reference_table: fct_forecastitem
+      expression: "FORECASTTYPEID"
+      description: "Forecast type identifier"
+      data_type: VARCHAR(20)
+
+    - name: LOCATIONID
+      reference_table: fct_forecastitem
+      expression: "LOCATIONID"
+      description: "Location identifier"
+      data_type: VARCHAR(50)
+
+    - name: SUBREGION
+      reference_table: fct_forecastitem
+      expression: "SUBREGION"
+      description: "Subregion classification"
+      data_type: VARCHAR(50)
+
+    - name: DERIVEDLOB
+      reference_table: fct_forecastitem
+      expression: "DERIVEDLOB"
+      description: "Derived line of business"
+      data_type: VARCHAR(50)
+
+# ═══════════════════════════════════════════════════════════════════════════
+# TABLE GRAIN DEFINITION
+# ═══════════════════════════════════════════════════════════════════════════
+grain:
+  - PK_FORECASTITEM_ID
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATA QUALITY RULES
+# ═══════════════════════════════════════════════════════════════════════════
+audits:
+  not_null:
+    - PK_FORECASTITEM_ID
+    - FORECASTITEMID
+    - PRODUCTID
+  unique_combination:
+    - PK_FORECASTITEM_ID
+    - FORECASTITEMID

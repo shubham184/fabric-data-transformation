@@ -1,0 +1,132 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# FCT_DEMAND_SUMMARY - Customer Gold Layer (Example)
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: FCT_DEMAND_SUMMARY_gold_customer
+  description: "Customer demand summary aggregated by month and customer segment"
+  layer: gold
+  kind: TABLE
+  owner: customer_analytics_team
+  tags: [demand, summary, aggregation, gold, customer]
+  domain: customer
+  refresh_frequency: daily
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  depends_on_tables:
+    - FCT_DEMANDSTORAGE_silver_product     # For demand quantities
+    - FCT_FORECASTCYCLE_silver_industry    # For cycle labels
+    - FCT_FORECASTITEM_silver_customer     # For customer attributes
+
+# ═══════════════════════════════════════════════════════════════════════════
+# COLUMN TRANSFORMATIONS
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    # Dimension columns (for GROUP BY)
+    - name: forecast_month
+      reference_table: FCT_FORECASTCYCLE_silver_industry
+      expression: "ForecastCycle_Label"
+      description: "Forecast month in YYYY-MM format"
+      data_type: VARCHAR(7)
+
+    - name: customer_segment
+      reference_table: FCT_FORECASTITEM_silver_customer
+      expression: "CUSTOMERSEGMENT"
+      description: "Customer segment classification"
+      data_type: VARCHAR(50)
+
+    - name: country
+      reference_table: FCT_FORECASTITEM_silver_customer
+      expression: "COUNTRY"
+      description: "Country code"
+      data_type: VARCHAR(3)
+
+    - name: demand_family
+      reference_table: FCT_FORECASTITEM_silver_customer
+      expression: "DEMANDFAMILY"
+      description: "Demand family classification"
+      data_type: VARCHAR(50)
+
+    # Aggregated metrics
+    - name: total_base_quantity
+      reference_table: FCT_DEMANDSTORAGE_silver_product
+      expression: "SUM(BASEQUANTITY)"
+      description: "Total base quantity demand"
+      data_type: DECIMAL(18,2)
+
+    - name: total_calculated_quantity
+      reference_table: FCT_DEMANDSTORAGE_silver_product
+      expression: "SUM(CalculatedQuantity)"
+      description: "Total calculated quantity after adjustments"
+      data_type: DECIMAL(18,2)
+
+    - name: item_count
+      reference_table: FCT_FORECASTITEM_silver_customer
+      expression: "COUNT(DISTINCT FORECASTITEMID)"
+      description: "Number of unique forecast items"
+      data_type: INTEGER
+
+    - name: customer_count
+      reference_table: FCT_FORECASTITEM_silver_customer
+      expression: "COUNT(DISTINCT CUSTOMERID)"
+      description: "Number of unique customers"
+      data_type: INTEGER
+
+    # Calculated metrics
+    - name: avg_quantity_per_item
+      reference_table: FCT_DEMANDSTORAGE_silver_product
+      expression: "SUM(BASEQUANTITY) / NULLIF(COUNT(DISTINCT fi.FORECASTITEMID), 0)"
+      description: "Average quantity per forecast item"
+      data_type: DECIMAL(18,2)
+
+# ═══════════════════════════════════════════════════════════════════════════
+# AGGREGATION LOGIC
+# ═══════════════════════════════════════════════════════════════════════════
+aggregations:
+  group_by:
+    - forecast_month
+    - customer_segment
+    - country
+    - demand_family
+  
+  having:
+    - "SUM(BASEQUANTITY) > 0"  # Only include rows with actual demand
+
+# ═══════════════════════════════════════════════════════════════════════════
+# TABLE GRAIN DEFINITION
+# ═══════════════════════════════════════════════════════════════════════════
+grain:
+  - forecast_month
+  - customer_segment
+  - country
+  - demand_family
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATA QUALITY RULES
+# ═══════════════════════════════════════════════════════════════════════════
+audits:
+  not_null:
+    - forecast_month
+    - customer_segment
+  positive_values:
+    - total_base_quantity
+    - item_count
+    - customer_count
+  unique_combination:
+    - forecast_month
+    - customer_segment
+    - country
+    - demand_family
+
+# ═══════════════════════════════════════════════════════════════════════════
+# PERFORMANCE OPTIMIZATION
+# ═══════════════════════════════════════════════════════════════════════════
+optimization:
+  partitioned_by: [forecast_month]
+  clustered_by: [customer_segment, country]
+  indexes:
+    - columns: [forecast_month, customer_segment]
+      type: composite

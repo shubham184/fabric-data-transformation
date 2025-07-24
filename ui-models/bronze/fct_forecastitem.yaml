@@ -1,0 +1,133 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# FCT_FORECASTITEM - Bronze Layer (Raw Data)
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: fct_forecastitem
+  description: "Raw forecast item data from source system"
+  layer: bronze
+  kind: TABLE
+  owner: data_engineering
+  tags: [forecast, item, bronze, raw]
+  domain: tbd
+  refresh_frequency: daily
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: raw.fct_forecastitem
+  depends_on_tables:
+    - raw.fct_forecastitem
+
+# ═══════════════════════════════════════════════════════════════════════════
+# COLUMN TRANSFORMATIONS (Direct mapping from source)
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    - name: FK_ITEMSEGMENTATION_ID
+      reference_table: raw.fct_forecastitem
+      expression: ""
+      description: "Foreign key to item segmentation dimension"
+      data_type: INTEGER
+
+    - name: FK_NODESEGMENTATION_ID
+      reference_table: raw.fct_forecastitem
+      expression: ""
+      description: "Foreign key to node segmentation dimension"
+      data_type: INTEGER
+
+    - name: FORECASTITEMID
+      reference_table: raw.fct_forecastitem
+      expression: ""
+      description: "Business key for forecast item"
+      data_type: VARCHAR(50)
+
+    - name: PRODUCTID
+      reference_table: raw.fct_forecastitem
+      expression: ""
+      description: "Product identifier"
+      data_type: VARCHAR(50)
+
+    - name: CURRENCYID
+      reference_table: raw.fct_forecastitem
+      expression: ""
+      description: "Currency code (ISO 3-letter format)"
+      data_type: VARCHAR(3)
+
+    - name: CUSTOMERID
+      reference_table: raw.fct_forecastitem
+      expression: ""
+      description: "Customer identifier"
+      data_type: VARCHAR(50)
+
+    - name: BUSINESSSEGMENTID
+      reference_table: raw.fct_forecastitem
+      expression: ""
+      description: "Business segment identifier"
+      data_type: VARCHAR(50)
+
+    - name: COUNTRY
+      reference_table: raw.fct_forecastitem
+      expression: ""
+      description: "Country code (ISO 3-letter format)"
+      data_type: VARCHAR(3)
+
+    - name: PRIORITY
+      reference_table: raw.fct_forecastitem
+      expression: ""
+      description: "Priority level for forecast item"
+      data_type: INTEGER
+
+    - name: ULTIMATEDESTINATION
+      reference_table: raw.fct_forecastitem
+      expression: ""
+      description: "Ultimate destination location for shipment"
+      data_type: VARCHAR(100)
+
+    - name: CUSTOMERSEGMENT
+      reference_table: raw.fct_forecastitem
+      expression: ""
+      description: "Customer segment classification"
+      data_type: VARCHAR(50)
+
+    - name: CUSTOMER_PRIORITY
+      reference_table: raw.fct_forecastitem
+      expression: ""
+      description: "Customer-specific priority level"
+      data_type: INTEGER
+
+    - name: DEMANDFAMILY
+      reference_table: raw.fct_forecastitem
+      expression: ""
+      description: "Demand family classification"
+      data_type: VARCHAR(50)
+
+    - name: FORECASTTYPEID
+      reference_table: raw.fct_forecastitem
+      expression: ""
+      description: "Forecast type identifier"
+      data_type: VARCHAR(20)
+
+    - name: LOCATIONID
+      reference_table: raw.fct_forecastitem
+      expression: ""
+      description: "Location identifier"
+      data_type: VARCHAR(50)
+
+    - name: SUBREGION
+      reference_table: raw.fct_forecastitem
+      expression: ""
+      description: "Subregion classification"
+      data_type: VARCHAR(50)
+
+    - name: DERIVEDLOB
+      reference_table: raw.fct_forecastitem
+      expression: ""
+      description: "Derived line of business classification"
+      data_type: VARCHAR(50)
+
+    - name: Tempflag
+      reference_table: raw.fct_forecastitem
+      expression: ""
+      description: "Temporary flag for data processing (0=permanent, 1=temporary)"
+      data_type: INTEGER

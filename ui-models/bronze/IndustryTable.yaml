@@ -1,0 +1,61 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# INDUSTRYTABLE - Bronze Layer (Raw Industry Reference Data)
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: IndustryTable
+  description: "Raw industry reference data from source system"
+  layer: bronze
+  kind: TABLE
+  owner: data_engineering
+  tags: [industry, reference, bronze, raw]
+  refresh_frequency: weekly
+  domain: industry
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: raw.IndustryTable
+  depends_on_tables:
+    - raw.IndustryTable
+
+# ═══════════════════════════════════════════════════════════════════════════
+# COLUMN TRANSFORMATIONS (Direct mapping from source)
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    - name: FORECASTITEMID
+      reference_table: raw.IndustryTable
+      expression: ""
+      description:  "Forecast item identifier for joining"
+      data_type: VARCHAR(50)
+
+    - name: value1
+      reference_table: raw.IndustryTable
+      expression: ""
+      description: "Industry value 1"
+      data_type: VARCHAR(255)
+
+    - name: Value2
+      reference_table: raw.IndustryTable
+      expression: ""
+      description: "Industry value 2"
+      data_type: VARCHAR(255)
+
+    - name: Value3
+      reference_table: raw.IndustryTable
+      expression: ""
+      description: "Industry value 3"
+      data_type: VARCHAR(255)
+
+    - name: Alterative_subregion
+      reference_table: raw.IndustryTable
+      expression: ""
+      description: "Alternative subregion classification"
+      data_type: VARCHAR(50)
+
+    - name: customerflag
+      reference_table: raw.IndustryTable
+      expression: ""
+      description: "Flag indicating customer-specific records"
+      data_type: INTEGER

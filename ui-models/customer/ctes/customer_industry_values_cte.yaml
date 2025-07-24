@@ -1,0 +1,64 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# CUSTOMER_INDUSTRY_VALUES_CTE - Customer-filtered industry values
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: customer_industry_values_cte
+  description: "CTE for industry values filtered for customer-specific records"
+  layer: cte
+  kind: CTE
+  owner: customer_team
+  tags: [customer, industry, cte, filtered]
+  domain: customer
+  refresh_frequency: daily
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: IndustryTable
+  depends_on_tables:
+    - IndustryTable
+
+# ═══════════════════════════════════════════════════════════════════════════
+# COLUMN TRANSFORMATIONS
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    - name: FORECASTITEMID
+      reference_table: IndustryTable
+      expression: "FORECASTITEMID"
+      description: "Forecast item identifier for joining"
+      data_type: VARCHAR(50)
+
+    - name: value1
+      reference_table: IndustryTable
+      expression: "value1"
+      description: "Industry value 1"
+      data_type: VARCHAR(255)
+
+    - name: value2
+      reference_table: IndustryTable
+      expression: "Value2"
+      description: "Industry value 2"
+      data_type: VARCHAR(255)
+
+    - name: value3
+      reference_table: IndustryTable
+      expression: "Value3"
+      description: "Industry value 3"
+      data_type: VARCHAR(255)
+
+    - name: Alterative_subregion
+      reference_table: IndustryTable
+      expression: "Alterative_subregion"
+      description: "Alternative subregion classification"
+      data_type: VARCHAR(50)
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATA FILTERING
+# ═══════════════════════════════════════════════════════════════════════════
+filters:
+  where_conditions:
+    # Customer-specific filter
+    - reference_table: IndustryTable
+      condition: "customerflag = 1"

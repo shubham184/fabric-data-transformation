@@ -1,0 +1,37 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# FCT_FORECASTGROUP - Bronze Layer (Raw Data)
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: fct_ForeCastGroup
+  description: "Raw forecast group data from source system"
+  layer: bronze
+  kind: TABLE
+  owner: data_engineering
+  tags: [forecast, group, bronze, raw]
+  domain: tbd
+  refresh_frequency: daily
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: raw.fct_ForeCastGroup
+  depends_on_tables:
+    - raw.fct_ForeCastGroup
+
+# ═══════════════════════════════════════════════════════════════════════════
+# COLUMN TRANSFORMATIONS (Direct mapping from source)
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    - name: ForecastGroupId
+      reference_table: raw.fct_ForeCastGroup
+      expression: ""
+      description: "Unique identifier for forecast group"
+      data_type: INTEGER
+
+    - name: Label
+      reference_table: raw.fct_ForeCastGroup
+      expression: ""
+      description: "Descriptive label for the forecast group"
+      data_type: VARCHAR(255)

@@ -1,0 +1,105 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# FCT_DEMANDSTORAGE - Product Silver Layer
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: FCT_DEMANDSTORAGE_silver_product
+  description: "Product vertical silver layer - standardized demand storage"
+  layer: silver
+  kind: VIEW
+  owner: product_team
+  tags: [demand, forecast, storage, silver, product]
+  domain: product
+  refresh_frequency: daily
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: fct_demandstorage
+  depends_on_tables:
+    - fct_demandstorage
+    - fct_ForecastCycle
+    - fct_ForeCastGroup
+    - fct_forecastitem
+
+# ═══════════════════════════════════════════════════════════════════════════
+# COLUMN TRANSFORMATIONS
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    - name: BASEQUANTITY
+      reference_table: fct_demandstorage
+      expression: "BASEQUANTITY"
+      description: "Base quantity for demand forecast"
+      data_type: DECIMAL(18,2)
+
+    - name: CalculatedQuantity
+      reference_table: fct_demandstorage
+      expression: "CalculatedQuantity"
+      description: "Calculated quantity after adjustments"
+      data_type: DECIMAL(18,2)
+
+    - name: ForecastCycle_Id
+      reference_table: fct_demandstorage
+      expression: "ForecastCycleId"
+      description: "Standardized forecast cycle identifier"
+      data_type: INTEGER
+
+    - name: ForecastGroup_Id
+      reference_table: fct_demandstorage
+      expression: "ForecastGroupId"
+      description: "Standardized forecast group identifier"
+      data_type: INTEGER
+
+    - name: ForecastItemId
+      reference_table: fct_demandstorage
+      expression: "ForecastItem_Id"
+      description: "Standardized forecast item identifier"
+      data_type: INTEGER
+
+# ═══════════════════════════════════════════════════════════════════════════
+# TABLE GRAIN DEFINITION
+# ═══════════════════════════════════════════════════════════════════════════
+grain:
+  - ForecastCycle_Id
+  - ForecastGroup_Id
+  - ForecastItemId
+
+# ═══════════════════════════════════════════════════════════════════════════
+# TABLE RELATIONSHIPS
+# ═══════════════════════════════════════════════════════════════════════════
+relationships:
+  foreign_keys:
+    - local_column: ForecastCycle_Id
+      references_table: FCT_FORECASTCYCLE_silver_product
+      references_column: ForecastCycle_Id
+      relationship_type: many-to-one
+      join_type: INNER
+
+    - local_column: ForecastGroup_Id
+      references_table: FCT_FORECASTGROUP_silver_product
+      references_column: ForecastGroup_Id
+      relationship_type: many-to-one
+      join_type: INNER
+
+    - local_column: ForecastItemId
+      references_table: FCT_FORECASTITEM_silver_product
+      references_column: FORECASTITEMID
+      relationship_type: many-to-one
+      join_type: INNER
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATA QUALITY RULES
+# ═══════════════════════════════════════════════════════════════════════════
+audits:
+  not_null:
+    - ForecastCycle_Id
+    - ForecastGroup_Id
+    - ForecastItemId
+  positive_values:
+    - BASEQUANTITY
+    - CalculatedQuantity
+  unique_combination:
+    - ForecastCycle_Id
+    - ForecastGroup_Id
+    - ForecastItemId

@@ -1,0 +1,60 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# FCT_FORECASTCYCLE - Product Silver Layer
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: FCT_FORECASTCYCLE_silver_product
+  description: "Product vertical silver layer - standardized forecast cycles"
+  layer: silver
+  kind: VIEW
+  owner: product_team
+  tags: [forecast, cycle, dimension, silver, product]
+  domain: product
+  refresh_frequency: daily
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: fct_ForecastCycle
+  depends_on_tables:
+    - fct_ForecastCycle
+
+# ═══════════════════════════════════════════════════════════════════════════
+# COLUMN TRANSFORMATIONS
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    - name: ForecastCycle_Id
+      reference_table: fct_ForecastCycle
+      expression: "ForecastCycleId"
+      description: "Standardized forecast cycle identifier"
+      data_type: INTEGER
+
+    - name: PeriodEnd
+      reference_table: fct_ForecastCycle
+      expression: "PeriodEnd"
+      description: "End date of the forecast period"
+      data_type: DATE
+
+    - name: PeriodStart
+      reference_table: fct_ForecastCycle
+      expression: "PeriodStart"
+      description: "Start date of the forecast period"
+      data_type: DATE
+
+# ═══════════════════════════════════════════════════════════════════════════
+# TABLE GRAIN DEFINITION
+# ═══════════════════════════════════════════════════════════════════════════
+grain:
+  - ForecastCycle_Id
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATA QUALITY RULES
+# ═══════════════════════════════════════════════════════════════════════════
+audits:
+  not_null:
+    - ForecastCycle_Id
+    - PeriodEnd
+    - PeriodStart
+  unique_combination:
+    - ForecastCycle_Id

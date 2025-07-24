@@ -1,0 +1,67 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# FCT_FORECASTCYCLE - Industry Silver Layer
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: FCT_FORECASTCYCLE_silver_industry
+  description: "Industry vertical silver layer - adds industry-specific forecast cycle attributes"
+  layer: silver
+  kind: VIEW
+  owner: industry_team
+  tags: [forecast, cycle, dimension, silver, industry]
+  domain: industry
+  refresh_frequency: daily
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: FCT_FORECASTCYCLE_silver_product
+  depends_on_tables:
+    - FCT_FORECASTCYCLE_silver_product  # Building on product silver
+
+# ═══════════════════════════════════════════════════════════════════════════
+# COLUMN TRANSFORMATIONS
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    # Inherit needed columns from product silver
+    - name: ForecastCycle_Id
+      reference_table: FCT_FORECASTCYCLE_silver_product
+      expression: "ForecastCycle_Id"
+      description: "Forecast cycle identifier"
+      data_type: INTEGER
+
+    - name: PeriodEnd
+      reference_table: FCT_FORECASTCYCLE_silver_product
+      expression: "PeriodEnd"
+      description: "End date of the forecast period"
+      data_type: DATE
+
+    - name: PeriodStart
+      reference_table: FCT_FORECASTCYCLE_silver_product
+      expression: "PeriodStart"
+      description: "Start date of the forecast period"
+      data_type: DATE
+
+    # Industry-specific additions
+    - name: ForecastCycle_Label
+      reference_table: FCT_FORECASTCYCLE_silver_product
+      expression: "FORMAT(PeriodEnd, 'yyyy-MM')"
+      description: "Industry-standard forecast cycle label (YYYY-MM format)"
+      data_type: VARCHAR(7)
+
+# ═══════════════════════════════════════════════════════════════════════════
+# TABLE GRAIN DEFINITION
+# ═══════════════════════════════════════════════════════════════════════════
+grain:
+  - ForecastCycle_Id
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATA QUALITY RULES
+# ═══════════════════════════════════════════════════════════════════════════
+audits:
+  not_null:
+    - ForecastCycle_Id
+    - ForecastCycle_Label
+  unique_combination:
+    - ForecastCycle_Id

@@ -1,0 +1,52 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# FCT_FORECASTGROUP - Product Silver Layer
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: FCT_FORECASTGROUP_silver_product
+  description: "Product vertical silver layer - standardized forecast groups"
+  layer: silver
+  kind: VIEW
+  owner: product_team
+  tags: [forecast, group, dimension, silver, product]
+  domain: product
+  refresh_frequency: daily
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: fct_ForeCastGroup
+  depends_on_tables:
+    - fct_ForeCastGroup
+
+# ═══════════════════════════════════════════════════════════════════════════
+# COLUMN TRANSFORMATIONS
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    - name: ForecastGroup_Id
+      reference_table: fct_ForeCastGroup
+      expression: "ForecastGroupId"
+      description: "Standardized forecast group identifier"
+      data_type: INTEGER
+
+    - name: Label
+      reference_table: fct_ForeCastGroup
+      expression: "ForecastGroupId"  # Note: JSON shows this maps to same field
+      description: "Label for the forecast group"
+      data_type: VARCHAR(255)
+
+# ═══════════════════════════════════════════════════════════════════════════
+# TABLE GRAIN DEFINITION
+# ═══════════════════════════════════════════════════════════════════════════
+grain:
+  - ForecastGroup_Id
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATA QUALITY RULES
+# ═══════════════════════════════════════════════════════════════════════════
+audits:
+  not_null:
+    - ForecastGroup_Id
+  unique_combination:
+    - ForecastGroup_Id

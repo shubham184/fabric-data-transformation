@@ -1,0 +1,55 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# FCT_DEMANDSTORAGE - Bronze Layer (Raw Data)
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: fct_demandstorage
+  description: "Raw demand storage fact table from source system"
+  layer: bronze
+  kind: TABLE
+  owner: data_engineering
+  tags: [demand, forecast, storage, bronze, raw]
+  refresh_frequency: daily
+  domain: demand
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: raw.fct_demandstorage  # Assuming raw schema
+  depends_on_tables:
+    - raw.fct_demandstorage
+
+# ═══════════════════════════════════════════════════════════════════════════
+# COLUMN TRANSFORMATIONS (Direct mapping from source)
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    - name: BASEQUANTITY
+      reference_table: raw.fct_demandstorage
+      expression: ""
+      description: "Base quantity of demand"
+      data_type: DECIMAL(18,2)
+
+    - name: CalculatedQuantity
+      reference_table: raw.fct_demandstorage
+      expression: ""
+      description: "Calculated quantity after adjustments"
+      data_type: DECIMAL(18,2)
+
+    - name: ForecastCycleId
+      reference_table: raw.fct_demandstorage
+      expression: ""
+      description: "Identifier for the forecast cycle"
+      data_type: INTEGER
+
+    - name: ForecastGroupId
+      reference_table: raw.fct_demandstorage
+      expression: ""
+      description: "Identifier for the forecast group"
+      data_type: INTEGER
+
+    - name: ForecastItem_Id
+      reference_table: raw.fct_demandstorage
+      expression: ""
+      description: "Identifier for the forecast item"
+      data_type: INTEGER

@@ -1,0 +1,43 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# FCT_FORECASTCYCLE - Bronze Layer (Raw Data)
+# ═══════════════════════════════════════════════════════════════════════════
+model:
+  name: fct_ForecastCycle
+  description: "Raw forecast cycle data from source system"
+  layer: bronze
+  kind: TABLE
+  owner: data_engineering
+  tags: [forecast, cycle, bronze, raw]
+  domain: tbd
+  refresh_frequency: daily
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATA SOURCES & DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════
+source:
+  base_table: raw.fct_ForecastCycle
+  depends_on_tables:
+    - raw.fct_ForecastCycle
+
+# ═══════════════════════════════════════════════════════════════════════════
+# COLUMN TRANSFORMATIONS (Direct mapping from source)
+# ═══════════════════════════════════════════════════════════════════════════
+transformations:
+  columns:
+    - name: ForecastCycleId
+      reference_table: raw.fct_ForecastCycle
+      expression: ""
+      description: "Unique identifier for forecast cycle"
+      data_type: INTEGER
+
+    - name: PeriodEnd
+      reference_table: raw.fct_ForecastCycle
+      expression: ""
+      description: "End date of the forecast period"
+      data_type: DATE
+
+    - name: PeriodStart
+      reference_table: raw.fct_ForecastCycle
+      expression: ""
+      description: "Start date of the forecast period"
+      data_type: DATE
