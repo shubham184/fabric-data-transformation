@@ -1,0 +1,12 @@
+{
+    "predecessors": [],
+    "base_table": "fct_ForecastCycle",
+    "where": [],
+    "columns": [
+        {
+            "ColumnName": "ForecastCycle_Label",
+            "Expression": "FORMAT(T.PeriodEnd, 'yyyy-MM')"
+        }
+    ],
+    "ctes": []
+}

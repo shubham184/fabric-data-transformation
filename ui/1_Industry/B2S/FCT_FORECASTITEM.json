@@ -1,0 +1,37 @@
+{
+    "columns": [
+        {
+            "ColumnName": "INDUSTRY1_COLUMN1",
+            "operation": "+",
+            "Expression": "IND.value1"
+        },
+        {
+            "ColumnName": "INDUSTRY1_COLUMN2",
+            "operation": "+",
+            "Expression": "IND.value2"
+        },
+        {
+            "ColumnName": "INDUSTRY1_COLUMN3",
+            "operation": "+",
+            "Condition": "@Feature('bias_calc')",
+            "Expression": "IND.value3"
+        },
+        {
+            "ColumnName": "LOCATIONID",
+            "operation": "-"
+        },
+        {
+            "ColumnName": "SUBREGION",
+            "operation": "u",
+            "Expression": "IND.Alterative_subregion"
+        }
+    ],
+    "ctes": [
+        {
+            "CTE": "IND",
+            "operation": "+",
+            "cte_join": "IND.FORECASTITEMID = T.FORECASTITEMID",
+            "cte_stmt": "-- industry specific values: \nSELECT FORECASTITEMID, value1, Value2, Value3 {{where}} from IndustryTable"
+        }
+    ]
+}
