@@ -3,6 +3,7 @@
 import networkx as nx
 from typing import Dict, List, Tuple
 from .models import DataModel
+from .column_validator import EnhancedColumnValidator
 
 
 class ModelValidator:
@@ -11,6 +12,7 @@ class ModelValidator:
     def __init__(self, models: Dict[str, DataModel]):
         self.models = models
         self.errors = []
+        self.column_validator = EnhancedColumnValidator(models)
         
     def validate_all(self) -> Tuple[bool, List[str]]:
         """Validate all models"""
@@ -20,6 +22,7 @@ class ModelValidator:
         self._validate_unique_model_names()
         self._validate_dependency_references()
         self._validate_column_references()
+        self._validate_enhanced_column_references()
         self._validate_cte_consistency()
         self._validate_grain_columns()
         self._validate_audit_rules()
@@ -131,6 +134,17 @@ class ModelValidator:
                         f"Model '{model_name}': grain column '{grain_col}' not found in transformations"
                     )
     
+    def _validate_enhanced_column_references(self):
+        """Validate column references using enhanced column validator"""
+        column_errors = self.column_validator.validate_all_column_references()
+        
+        for error in column_errors:
+            # Convert ColumnValidationError to string format for consistency
+            error_message = f"Model '{error.model_name}' column '{error.column_name}': {error.message}"
+            if error.suggestion:
+                error_message += f" (Suggestion: {error.suggestion})"
+            self.errors.append(error_message)
+    
     def _validate_audit_rules(self):
         """Validate audit rules"""
         for model_name, model in self.models.items():
@@ -178,3 +192,23 @@ class ModelValidator:
                 error_types['other_errors'] = error_types.get('other_errors', 0) + 1
         
         return error_types
+    
+    def get_detailed_column_validation_report(self) -> str:
+        """Get a detailed column validation report"""
+        return self.column_validator.format_error_report(include_suggestions=True)
+    
+    def validate_model_columns_only(self, model_name: str) -> List[str]:
+        """Validate only column references for a specific model"""
+        if model_name not in self.models:
+            return [f"Model '{model_name}' not found"]
+        
+        column_errors = self.column_validator.validate_model_column_references(model_name)
+        error_messages = []
+        
+        for error in column_errors:
+            error_message = f"Column '{error.column_name}': {error.message}"
+            if error.suggestion:
+                error_message += f" (Suggestion: {error.suggestion})"
+            error_messages.append(error_message)
+        
+        return error_messages

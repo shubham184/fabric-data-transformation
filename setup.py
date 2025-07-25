@@ -37,6 +37,7 @@ setup(
     entry_points={
         "console_scripts": [
             "data-transform=data_transformation_tool.cli:main",
+            "data-transform-rich=data_transformation_tool.cli_enhanced:app",
         ],
     },
 )

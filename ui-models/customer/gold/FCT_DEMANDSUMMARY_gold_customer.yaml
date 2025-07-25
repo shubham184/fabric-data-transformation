@@ -78,7 +78,7 @@ transformations:
     # Calculated metrics
     - name: avg_quantity_per_item
       reference_table: FCT_DEMANDSTORAGE_silver_product
-      expression: "SUM(BASEQUANTITY) / NULLIF(COUNT(DISTINCT fi.FORECASTITEMID), 0)"
+      expression: "SUM(BASEQUANTITY) / NULLIF(COUNT(DISTINCT ForecastItemId), 0)"
       description: "Average quantity per forecast item"
       data_type: DECIMAL(18,2)
 
