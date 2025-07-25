@@ -1,0 +1,33 @@
+{
+  "target": "FCT_DEMANDSTORAGE",
+  "predecessors": [
+    "FCT_FORECASTCYCLE",
+    "FCT_FORECASTGROUP",
+    "FCT_FORECASTITEM"
+  ],
+  "base_table": "fct_demandstorage",
+  "columns": [
+    {
+      "ColumnName": "BASEQUANTITY",
+      "Expression": "T.BASEQUANTITY"
+    },
+    {
+      "ColumnName": "CalculatedQuantity",
+      "Expression": "T.CalculatedQuantity"
+    },
+    {
+      "ColumnName": "ForecastCycle_Id",
+      "Expression": "T.ForecastCycleId"
+    },
+    {
+      "ColumnName": "ForecastGroup_Id",
+      "Expression": "T.ForecastGroupId"
+    },
+    {
+      "ColumnName": "ForecastItemId",
+      "Expression": "T.ForecastItem_Id"
+    }
+  ],
+  "where": [],
+  "ctes": []
+}

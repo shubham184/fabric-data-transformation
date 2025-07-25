@@ -1,0 +1,11 @@
+{
+    "columns": [
+        {
+            // I need to change this because ...
+            "ColumnName": "CURRENCYID",
+            "operation": "U",
+            "Comment":"changed the datatype",
+            "Expression": "CAST(T.DEMANDFAMILY,Int)",
+        }
+    ]
+}

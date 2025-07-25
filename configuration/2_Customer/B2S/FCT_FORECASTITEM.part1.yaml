@@ -1,0 +1,6 @@
+# this is an additional field defined by the customer
+columns:
+    - ColumnName: CustomerMainSegment
+      operation: +
+      Expression: 'SUBSTRING(T.CUSTOMERSEGMENT, 0, 3)'
+

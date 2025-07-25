@@ -1,0 +1,112 @@
+{
+  "target": "FCT_FORECASTITEM",
+  "predecessors": [],
+  "base_table": "fct_forecastitem",
+  "columns": [
+    {
+      "ColumnName": "PK_FORECASTITEM_ID",
+      "Expression": "@newpk()"
+    },
+    {
+      "ColumnName": "FK_ITEMSEGMENTATION_ID",
+      "Expression": "T.FK_ITEMSEGMENTATION_ID"
+    },
+    {
+      "ColumnName": "FK_NODESEGMENTATION_ID",
+      "Expression": "T.FK_NODESEGMENTATION_ID"
+    },
+    {
+      "ColumnName": "FORECASTITEMID",
+      "Expression": "T.FORECASTITEMID"
+    },
+    {
+      "ColumnName": "PRODUCTID",
+      "Expression": "T.PRODUCTID"
+    },
+    {
+      "ColumnName": "CURRENCYID",
+      "Expression": "CAST(T.DEMANDFAMILY,Int)",
+      "Comment": "changed the datatype"
+    },
+    {
+      "ColumnName": "CUSTOMERID",
+      "Expression": "T.CUSTOMERID"
+    },
+    {
+      "ColumnName": "BUSINESSSEGMENTID",
+      "Expression": "T.BUSINESSSEGMENTID"
+    },
+    {
+      "ColumnName": "COUNTRY",
+      "Expression": "T.COUNTRY"
+    },
+    {
+      "ColumnName": "PRIORITY",
+      "Expression": "T.PRIORITY"
+    },
+    {
+      "ColumnName": "ULTIMATEDESTINATION",
+      "Expression": "T.ULTIMATEDESTINATION"
+    },
+    {
+      "ColumnName": "CUSTOMERSEGMENT",
+      "Expression": "T.CUSTOMERSEGMENT"
+    },
+    {
+      "ColumnName": "CUSTOMER_PRIORITY",
+      "Expression": "T.CUSTOMER_PRIORITY"
+    },
+    {
+      "ColumnName": "DEMANDFAMILY",
+      "Expression": "RTRIM(T.DEMANDFAMILY, '-')",
+      "Comment": "Industry Override"
+    },
+    {
+      "ColumnName": "FORECASTTYPEID",
+      "Expression": "T.FORECASTTYPEID"
+    },
+    {
+      "ColumnName": "SUBREGION",
+      "Expression": "IND.Alterative_subregion"
+    },
+    {
+      "ColumnName": "DERIVEDLOB",
+      "Expression": "T.DERIVEDLOB"
+    },
+    {
+      "ColumnName": "INDUSTRY1_COLUMN1",
+      "Expression": "IND.value1"
+    },
+    {
+      "ColumnName": "INDUSTRY1_COLUMN2",
+      "Expression": "IND.value2"
+    },
+    {
+      "ColumnName": "INDUSTRY1_COLUMN3",
+      "Expression": "IND.value3"
+    },
+    {
+      "ColumnName": "CustomerMainSegment",
+      "Expression": "SUBSTRING(T.CUSTOMERSEGMENT, 0, 3)"
+    }
+  ],
+  "where": [
+    {
+      "id": "CUST1",
+      "clause": "T.Tempflag = 0"
+    }
+  ],
+  "ctes": [
+    {
+      "CTE": "IND",
+      "cte_join": "IND.FORECASTITEMID = T.FORECASTITEMID",
+      "cte_stmt": "-- industry specific values: \nSELECT FORECASTITEMID, value1, Value2, Value3 {{where}} from IndustryTable",
+      "where": [
+        {
+          "id": "c1",
+          "clause": "customerflag = 1"
+        }
+      ]
+    }
+  ]
+}

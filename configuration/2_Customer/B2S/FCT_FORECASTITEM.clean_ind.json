@@ -1,0 +1,23 @@
+{
+    "where" :[
+        {
+            "id": "CUST1",
+            "clause" : "T.Tempflag = 0"
+        }
+    ],
+    "ctes": [
+{
+            "CTE": "IND",
+            "operation":"U",
+            "where": 
+            [
+                {
+                    "id":"c1",
+                    "operation" : "+",
+                    "clause": "customerflag = 1"
+                }
+            ]
+        }
+    ]
+}
+

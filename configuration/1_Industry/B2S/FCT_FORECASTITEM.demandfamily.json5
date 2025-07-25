@@ -1,0 +1,11 @@
+{
+    "columns": [
+        {
+            // example of an override at industry level, the sourc column is trimmed from any trailing hyphens
+            "ColumnName": "DEMANDFAMILY",
+            "operation": "U",
+            "Comment":"Industry Override",
+            "Expression": "RTRIM(T.DEMANDFAMILY, '-')",
+        }
+    ]
+}

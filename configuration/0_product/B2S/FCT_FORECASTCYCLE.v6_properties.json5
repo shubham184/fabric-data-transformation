@@ -1,0 +1,16 @@
+// @VersionCheck("FCT",min="6.0.0")
+
+// example on how to conditionally include/exclude parts of the configuration based on PLS version info
+{
+    "predecessors": [],
+    "base_table": "fct_ForecastCycle",
+    "where": [],
+    "columns": [
+        {
+            "ColumnName": "CycleTelescopicFlag",
+            "operation":"+",
+            "Expression": "T.CycleTelescopicFlag"
+        },
+    ],
+    "ctes": []
+}

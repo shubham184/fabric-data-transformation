@@ -1,0 +1,17 @@
+{
+  "target": "FORECASTITEM",
+  "predecessors": [],
+  "base_table": "fct_forecastitem",
+  "columns": [
+    {
+      "ColumnName": "PK_FORECASTITEM_ID",
+      "Expression": "@newpk()"
+    },
+    {
+      "ColumnName": "FK_ITEMSEGMENTATION_ID",
+      "Expression": "T.FK_ITEMSEGMENTATION_ID"
+    }
+  ],
+  "where": [],
+  "ctes": []
+}

@@ -1,0 +1,20 @@
+{
+    "predecessors": [],
+    "base_table": "fct_ForecastCycle",
+    "where": [],
+    "columns": [
+        {
+            "ColumnName": "ForecastCycle_Id",
+            "Expression": "T.ForecastCycleId"
+        },
+        {
+            "ColumnName": "PeriodEnd",
+            "Expression": "T.PeriodEnd"
+        },
+        {
+            "ColumnName": "PeriodStart",
+            "Expression": "T.PeriodStart"
+        }
+    ],
+    "ctes": []
+}

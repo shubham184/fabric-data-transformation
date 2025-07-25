@@ -1,0 +1,98 @@
+{
+    "predecessors": [],
+    "base_table": "fct_forecastitem",
+    "where": [],
+    "columns": [
+        {
+            "ColumnName": "PK_FORECASTITEM_ID",
+            "operation": "+",
+            "Expression": "@newpk()"
+        },
+        {
+            "ColumnName": "FK_ITEMSEGMENTATION_ID",
+            "operation": "+",
+            "Expression": "T.FK_ITEMSEGMENTATION_ID"
+        },
+        {
+            "ColumnName": "FK_NODESEGMENTATION_ID",
+            "operation": "+",
+            "Expression": "T.FK_NODESEGMENTATION_ID"
+        },
+        {
+            "ColumnName": "FORECASTITEMID",
+            "operation": "+",
+            "Expression": "T.FORECASTITEMID"
+        },
+        {
+            "ColumnName": "PRODUCTID",
+            "operation": "+",
+            "Expression": "T.PRODUCTID"
+        },
+        {
+            "ColumnName": "CURRENCYID",
+            "operation": "+",
+            "Expression": "T.CURRENCYID"
+        },
+        {
+            "ColumnName": "CUSTOMERID",
+            "operation": "+",
+            "Expression": "T.CUSTOMERID"
+        },
+        {
+            "ColumnName": "BUSINESSSEGMENTID",
+            "operation": "+",
+            "Expression": "T.BUSINESSSEGMENTID"
+        },
+        {
+            "ColumnName": "COUNTRY",
+            "operation": "+",
+            "Expression": "T.COUNTRY"
+        },
+        {
+            "ColumnName": "PRIORITY",
+            "operation": "+",
+            "Expression": "T.PRIORITY"
+        },
+        {
+            "ColumnName": "ULTIMATEDESTINATION",
+            "operation": "+",
+            "Expression": "T.ULTIMATEDESTINATION"
+        },
+        {
+            "ColumnName": "CUSTOMERSEGMENT",
+            "operation": "+",
+            "Expression": "T.CUSTOMERSEGMENT"
+        },
+        {
+            "ColumnName": "CUSTOMER_PRIORITY",
+            "operation": "+",
+            "Expression": "T.CUSTOMER_PRIORITY"
+        },
+        {
+            "ColumnName": "DEMANDFAMILY",
+            "operation": "+",
+            "Expression": "T.DEMANDFAMILY"
+        },
+        {
+            "ColumnName": "FORECASTTYPEID",
+            "operation": "+",
+            "Expression": "T.FORECASTTYPEID"
+        },
+        {
+            "ColumnName": "LOCATIONID",
+            "operation": "+",
+            "Expression": "T.LOCATIONID"
+        },
+        {
+            "ColumnName": "SUBREGION",
+            "operation": "+",
+            "Expression": "T.SUBREGION"
+        },
+        {
+            "ColumnName": "DERIVEDLOB",
+            "operation": "+",
+            "Expression": "T.DERIVEDLOB"
+        }
+    ],
+    "ctes" : []
+}

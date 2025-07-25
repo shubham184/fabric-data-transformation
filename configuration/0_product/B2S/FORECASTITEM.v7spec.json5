@@ -1,0 +1,22 @@
+// @VersionCheck("FCT",min="7.0.1")
+
+// example on how to conditionally include/exclude parts of the configuration based on PLS version info
+
+{
+    "predecessors": [],
+    "base_table": "fct_forecastitem",
+    "where": [],
+    "columns": [
+        {
+            "ColumnName": "PK_FORECASTITEM_ID",
+            "operation": "+",
+            "condition": "@version(FCT>7.0.0)",
+            "Expression": "@newpk()"
+        },
+        {
+            "ColumnName": "FK_ITEMSEGMENTATION_ID",
+            "operation": "+",
+            "Expression": "T.FK_ITEMSEGMENTATION_ID"
+        },
+    ]
+}

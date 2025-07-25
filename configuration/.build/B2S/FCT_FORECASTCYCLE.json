@@ -1,0 +1,29 @@
+{
+  "target": "FCT_FORECASTCYCLE",
+  "predecessors": [],
+  "base_table": "fct_ForecastCycle",
+  "columns": [
+    {
+      "ColumnName": "ForecastCycle_Id",
+      "Expression": "T.ForecastCycleId"
+    },
+    {
+      "ColumnName": "PeriodEnd",
+      "Expression": "T.PeriodEnd"
+    },
+    {
+      "ColumnName": "PeriodStart",
+      "Expression": "T.PeriodStart"
+    },
+    {
+      "ColumnName": "CycleTelescopicFlag",
+      "Expression": "T.CycleTelescopicFlag"
+    },
+    {
+      "ColumnName": "ForecastCycle_Label",
+      "Expression": "FORMAT(T.PeriodEnd, 'yyyy-MM')"
+    }
+  ],
+  "where": [],
+  "ctes": []
+}

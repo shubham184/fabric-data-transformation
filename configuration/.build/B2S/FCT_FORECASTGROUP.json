@@ -1,0 +1,17 @@
+{
+  "target": "FCT_FORECASTGROUP",
+  "predecessors": [],
+  "base_table": "fct_ForeCastGroup",
+  "columns": [
+    {
+      "ColumnName": "ForecastGroup_Id",
+      "Expression": "T.ForecastGroupId"
+    },
+    {
+      "ColumnName": "Label",
+      "Expression": "T.ForecastGroupId"
+    }
+  ],
+  "where": [],
+  "ctes": []
+}
