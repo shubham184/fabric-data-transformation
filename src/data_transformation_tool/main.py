@@ -172,6 +172,85 @@ class DataTransformationTool:
         except Exception as e:
             self.logger.error(f"Error getting enhanced lineage data: {e}")
             return {}
+    
+    def generate_full_lineage_reports(self, output_directory: str) -> bool:
+        """Generate all lineage reports: JSON, HTML, and DOT formats"""
+        try:
+            from .lineage.graph_builder import LineageGraphBuilder
+            from .lineage.exporters.json_exporter import JSONLineageExporter
+            from .lineage.exporters.html_exporter import HTMLLineageExporter
+            from .lineage.exporters.dot_exporter import DOTLineageExporter
+            
+            # Ensure models are loaded
+            if not self.models:
+                self.models = self.yaml_reader.read_all_models()
+            
+            # Create output directory
+            output_path = Path(output_directory)
+            output_path.mkdir(parents=True, exist_ok=True)
+            
+            # Initialize graph builder
+            graph_builder = LineageGraphBuilder(self.models)
+            
+            # 1. Generate enhanced JSON lineage
+            self.logger.info("Generating enhanced JSON lineage report...")
+            json_exporter = JSONLineageExporter(graph_builder)
+            enhanced_json = json_exporter.export_full_lineage()
+            
+            enhanced_json_file = output_path / "enhanced_lineage_report.json"
+            with open(enhanced_json_file, 'w', encoding='utf-8') as f:
+                f.write(enhanced_json)
+            self.logger.info(f"Enhanced JSON lineage saved to {enhanced_json_file}")
+            
+            # 2. Generate interactive HTML lineage
+            self.logger.info("Generating interactive HTML lineage visualization...")
+            html_exporter = HTMLLineageExporter(graph_builder)
+            html_content = html_exporter.export_interactive_lineage("Data Lineage Visualization")
+            
+            html_file = output_path / "interactive_lineage.html"
+            with open(html_file, 'w', encoding='utf-8') as f:
+                f.write(html_content)
+            self.logger.info(f"Interactive HTML lineage saved to {html_file}")
+            
+            # 3. Generate DOT lineage files
+            self.logger.info("Generating DOT lineage diagrams...")
+            dot_exporter = DOTLineageExporter(graph_builder)
+            
+            # Model-level lineage
+            model_dot = dot_exporter.export_model_lineage(include_columns=False)
+            model_dot_file = output_path / "lineage.dot"
+            with open(model_dot_file, 'w', encoding='utf-8') as f:
+                f.write(model_dot)
+            self.logger.info(f"Model-level DOT lineage saved to {model_dot_file}")
+            
+            # Column-level lineage
+            column_dot = dot_exporter.export_model_lineage(include_columns=True)
+            column_dot_file = output_path / "column_lineage.dot"
+            with open(column_dot_file, 'w', encoding='utf-8') as f:
+                f.write(column_dot)
+            self.logger.info(f"Column-level DOT lineage saved to {column_dot_file}")
+            
+            # Also generate the basic lineage report for compatibility
+            lineage_report = self.get_lineage_report()
+            lineage_file = output_path / "lineage_report.json"
+            with open(lineage_file, 'w', encoding='utf-8') as f:
+                f.write(lineage_report)
+            self.logger.info(f"Basic lineage report saved to {lineage_file}")
+            
+            print(f"📊 Generated full lineage reports:")
+            print(f"  • enhanced_lineage_report.json - Detailed column-level lineage")
+            print(f"  • interactive_lineage.html - Interactive visualization")
+            print(f"  • lineage.dot - Model-level DOT diagram")
+            print(f"  • column_lineage.dot - Column-level DOT diagram")
+            print(f"  • lineage_report.json - Basic lineage report")
+            
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Error generating full lineage reports: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
         
     def initialize_plan_components(self):
         """Initialize plan-related components"""

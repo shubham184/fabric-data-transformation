@@ -57,7 +57,7 @@ class DOTLineageExporter:
         
         dot_lines.append('}')
         
-        return '\\n'.join(dot_lines)
+        return '\n'.join(dot_lines)
     
     def export_model_focus(self, model_name: str, depth: int = 2) -> str:
         """Export focused view of a specific model and its neighbors."""
@@ -88,7 +88,7 @@ class DOTLineageExporter:
         
         dot_lines.append('}')
         
-        return '\\n'.join(dot_lines)
+        return '\n'.join(dot_lines)
     
     def export_impact_analysis(self, model_name: str) -> str:
         """Export impact analysis visualization."""
@@ -126,7 +126,7 @@ class DOTLineageExporter:
         
         dot_lines.append('}')
         
-        return '\\n'.join(dot_lines)
+        return '\n'.join(dot_lines)
     
     def _generate_model_nodes(self, filter_models: Set[str] = None) -> List[str]:
         """Generate DOT nodes for models."""

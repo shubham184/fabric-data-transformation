@@ -295,11 +295,16 @@ def main():
             if success:
                 tool.save_sql_outputs(args.output)
                 
-                if config.get('generate_lineage', True):
-                    lineage_report = tool.get_lineage_report()
-                    lineage_file = Path(args.output) / "lineage_report.json"
-                    with open(lineage_file, 'w') as f:
-                        f.write(lineage_report)
+                if config.get('generate_lineage', True) or args.lineage or args.lineage_full:
+                    if args.lineage_full:
+                        print("🔍 Generating full lineage reports...")
+                        tool.generate_full_lineage_reports(args.output)
+                        print("✅ Full lineage reports generated")
+                    else:
+                        lineage_report = tool.get_lineage_report()
+                        lineage_file = Path(args.output) / "lineage_report.json"
+                        with open(lineage_file, 'w') as f:
+                            f.write(lineage_report)
                 
                 print(f"✅ Successfully generated SQL for {len(sql_outputs)} models")
                 print(f"📁 Output saved to {args.output}")
